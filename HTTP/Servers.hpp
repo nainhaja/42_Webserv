@@ -20,8 +20,9 @@ class Servers
 
     public:
         Servers(void);
-        Servers(std::string File_name);
+        //Servers(std::string File_name);
         std::vector<Conf>               get_server();
+        void                            parse_server(std::string name);
         ~Servers(void);
 };
 

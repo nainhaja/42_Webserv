@@ -40,7 +40,9 @@
 #include <stdlib.h>
 Response::Response(void)
 {
-    Servers ok("HTTP/conf");
+    Servers ok;
+
+    ok.parse_server("HTTP/conf");
     this->my_servers = ok.get_server();
     this->body_size = 0;
 }
@@ -154,13 +156,14 @@ void                        Response::set_hello(std::string c)
 
 std::string                Response::check_file(void)
 {
-    Servers ok("HTTP/conf");
+    Servers ok;
     std::string path = this->get_mybuffer();
     std::vector <std::string> location_paths;
     std::string               str;
     std::vector <std::string> tokens;
     std::stringstream         check(path);
 
+    ok.parse_server("HTTP/conf");
     while(getline(check, str, '/'))
         tokens.push_back(str);   
     for(int i=0; i < ok.get_server()[0].get_locations().size(); i++)
@@ -237,7 +240,9 @@ void               Response::error_handling(std::string error)
     {
         std::vector<std::string>  c;
         std::string method;
-        Servers ok("conf");
+        Servers ok;
+
+        ok.parse_server("HTTP/conf");
         c = ok.get_server()[0].get_locations()[this->pos].get_allow_methods();
         if (std::find(c.begin(), c.end(), "GET") != c.end())
             this->my_Res << "Allow: " << method << "\r\n";
