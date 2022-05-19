@@ -48,6 +48,7 @@ class Response
         void                        handle_post_response(std::string connection);
         size_t                      get_body_size(void);
         size_t                      get_total_size(void);
+        std::string                 get_error_body(std::string path);
         ~Response(void);
 };
 

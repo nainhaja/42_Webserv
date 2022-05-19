@@ -262,20 +262,20 @@ void            HttpRequest::get_request(std::string data, size_t & body_size, s
     }
 }
 
-void            HttpRequest::handle_http_request(int new_socket)
+int            HttpRequest::handle_http_request(int new_socket, std::fstream & body_file, size_t &body_size, std::ostringstream & body_stream)
 {
-    std::fstream    body_file;
-    size_t          body_size;
+   // std::fstream    body_file;
+    //size_t          body_size;
     std::string     data;
     int             valread;
     char            buffer[30000] = {0};
-    std::ostringstream body_stream;
+    //std::ostringstream body_stream;
 
     data = "";
-    body_size = 0;
-    body_file.open("body.txt", std::ios::out);
-    while(1)
-    {
+    //body_size = 0;
+    //body_file.open("body.txt", std::ios::out);
+    // while(1)
+    // {
         valread = read( new_socket , buffer, 3000);
         this->total_size += valread;
         for (size_t i = 0; i < valread; i++)
@@ -284,7 +284,7 @@ void            HttpRequest::handle_http_request(int new_socket)
         {
             this->get_request(data, body_size, body_stream);
             if (this->Http_Method != "POST")
-                break ;
+                return 0;
         }
         else if (this->Http_Method == "POST")
         {     
@@ -292,24 +292,25 @@ void            HttpRequest::handle_http_request(int new_socket)
             if (this->tranfer_encoding != "" && data.find("0\r\n\r\n") != std::string::npos)
             {
                 body_stream << data << std::endl; 
-                break ;
+                return 0;
             }
             else if (this->content_length == body_size - 1)
             {
                 body_stream << data << std::endl; 
-                break ;
+                return 0 ;
             }
             body_stream << data;  
         }
         else
-            break;
+            return 0;
         data.clear(); 
-    }
-    if (this->Http_Method == "POST")
-    {
-        body_file << body_stream.str() << std::endl;
-        body_file.close();        
-    }
+        return 1;
+    //}
+    // if (this->Http_Method == "POST")
+    // {
+    //     body_file << body_stream.str() << std::endl;
+    //     body_file.close();        
+    // }
 }
 
 std::string HttpRequest::Get_Http_Method(void)

@@ -8,8 +8,10 @@ Server
 
     index index.html index.php 
      
-    error_page      404 ./error_pages/404.html
-    error_page      405 /sdsd/dsdsd/405.html
+    error_page      404 ./HTTP/error_pages/404.html
+    error_page      403 ./HTTP/error_pages/403.html
+    error_page      405 ./HTTP/error_pages/405.html
+    error_page      500 ./HTTP/error_pages/500.html
     autoindex off
 
     redirection    /doooooxsxvasvf /test/
@@ -17,7 +19,7 @@ Server
     
 
 
-    location /PATH03/index.html
+    location /HTTP/PATH03/index.html
     {
         root .
         autoindex on
