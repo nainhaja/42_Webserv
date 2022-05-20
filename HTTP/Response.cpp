@@ -370,17 +370,21 @@ size_t                      Response::handle_Get_response(void)
             }
             else if (this->my_servers[0].get_locations()[this->pos].get_location_path() == "/")
             {
-                body = this->my_servers[0].get_locations()[this->pos].get_root() + "/" + this->my_servers[0].get_index()[1];
+                body = this->my_servers[0].get_locations()[this->pos].get_root() + "/" + this->my_servers[0].get_index()[0];
                 if (stat(body.c_str(), &status) < 0)
                 {
                     error_handling("403 Forbidden");
-                    return 0;
                 }
                 else
                 {
                     this->my_Res << "Content-Type: text/html\r\n";
-                    this->my_Res << "Content-Length: " << status.st_size << "\r\n";
+                    this->my_Res << "Content-Length: " << status.st_size << "\r\n\r\n";
+                    get_body(body);
+                    this->set_hello(this->my_Res.str());
+                    std::cout << this->my_Res.str();
+                    this->total_size = this->my_Res.str().size();
                 }
+                return 0;
             }
             else
             {

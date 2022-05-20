@@ -1,7 +1,7 @@
 Server
 {
     listen             127.0.0.1 8080
-    root             ./root 
+    root             ./HTTP
     allow_methods      GET POST 
 
     upload_path        /somewhere/ 
@@ -19,9 +19,9 @@ Server
     
 
 
-    location /HTTP/PATH03/index.html
+    location /
     {
-        root .
+        root ./HTTP
         autoindex on
         allow_methods GET  POST
     }
