@@ -28,10 +28,13 @@ class Response
         std::string                     dir_body;
         size_t                          body_size;
         size_t                          total_size;
+        std::string                     req_method;
+        std::string                     req_target;
     public:
         Response(void);
         Response(std::string File_name);
         char                        *get_date(void);
+        std::string                 parsing_check(void);
         std::string                 check_file(void);
         size_t                      handle_Get_response(void);
         void                        error_handling(std::string error);
@@ -49,6 +52,10 @@ class Response
         size_t                      get_body_size(void);
         size_t                      get_total_size(void);
         std::string                 get_error_body(std::string path);
+        void                        set_request_method(std::string c);
+        std::string                 get_request_method(void);
+        void                        set_request_target(std::string c);
+        std::string                 get_request_target(void);
         ~Response(void);
 };
 

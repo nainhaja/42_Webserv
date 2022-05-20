@@ -1,5 +1,4 @@
-Server
-{
+Server {
     listen             127.0.0.1 8080
     root             ./HTTP
     allow_methods      GET POST 
@@ -19,18 +18,18 @@ Server
     
 
 
-    location /
-    {
+    location {
         root ./HTTP
+        path /PATH03/index.html
         autoindex on
-        allow_methods GET  POST
+        allow_methods  GET POST
     }
     
 
-    location /users
-    {
+    location {
         root ./root/univers/user
         autoindex on
+        path /users 
         allow_methods GET  POST
     } 
     cgi .php

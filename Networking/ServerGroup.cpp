@@ -185,15 +185,25 @@ void					ServerGroup::start()
 						}
 						else if (http.Get_Http_Method() == "POST")
 							http.handle_regular_body();
-						Response ok;
-       					ok.set_mybuffer(http.Get_Request_Target());
-       					if (http.Get_Http_Method() == "GET")
-       					    body_size = ok.handle_Get_response();
-       					else if (http.Get_Http_Method() == "DELETE")
-       					    ok.handle_delete_response(http.get_value("Connection"));
-       					else if (http.Get_Http_Method() == "POST")
-       					    ok.handle_post_response(http.get_value("Connection"));
-						
+						Response 	ok;
+						std::string	error_msg;
+
+						ok.set_request_method(http.Get_Http_Method());
+						ok.set_request_target(http.Get_Request_Target());
+						ok.set_mybuffer(http.Get_Request_Target());
+						ok.check_file();
+						error_msg = ok.parsing_check();
+						if (error_msg != "")
+							ok.error_handling(error_msg);
+						else
+						{
+							if (http.Get_Http_Method() == "GET")
+								body_size = ok.handle_Get_response();
+							else if (http.Get_Http_Method() == "DELETE")
+								ok.handle_delete_response(http.get_value("Connection"));
+							else if (http.Get_Http_Method() == "POST")
+								ok.handle_post_response(http.get_value("Connection"));							
+						}
        					write(i , ok.get_hello() , ok.get_total_size());
 						FD_CLR(i, & _masterwritefds);
        					close(i);

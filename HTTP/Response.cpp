@@ -45,8 +45,28 @@ Response::Response(void)
     ok.parse_server("HTTP/conf");
     this->my_servers = ok.get_server();
     this->body_size = 0;
+    this->req_method = "";
 }
 
+void                     Response::set_request_method(std::string c)
+{
+    this->req_method = c;
+}
+
+std::string              Response::get_request_method(void)
+{
+    return this->req_method;
+}
+
+void                     Response::set_request_target(std::string c)
+{
+    this->req_target = c;
+}
+
+std::string              Response::get_request_target(void)
+{
+    return this->req_target;
+}
 
 Response::~Response(void)
 {
@@ -75,7 +95,7 @@ std::string              Response::get_error_body(std::string path)
     int ind;
     struct stat         status;
 
-    std::cout << path << std::endl;
+    //std::cout << path << std::endl;
     //body_file.open("my_body.txt", std::ios::out);
     int fd = open(path.c_str(), O_RDONLY);
     stat(path.c_str(), &status);
@@ -108,7 +128,7 @@ size_t              Response::get_body(std::string path)
     int ind;
     struct stat         status;
 
-    std::cout << path << std::endl;
+    //std::cout << path << std::endl;
     //body_file.open("my_body.txt", std::ios::out);
     int fd = open(path.c_str(), O_RDONLY);
     stat(path.c_str(), &status);
@@ -236,17 +256,17 @@ void               Response::error_handling(std::string error)
     my_Res_error << "Date: "<< this->get_date() << std::endl;
     my_Res_error << "Server: Webserv/4.0.4" << std::endl;
 
-    if (Error_ind == "405") //rj3ha 405
-    {
-        std::vector<std::string>  c;
-        std::string method;
-        Servers ok;
+    // if (Error_ind == "405") //rj3ha 405
+    // {
+    //     std::vector<std::string>  c;
+    //     std::string method;
+    //     Servers ok;
 
-        ok.parse_server("HTTP/conf");
-        c = ok.get_server()[0].get_locations()[this->pos].get_allow_methods();
-        if (std::find(c.begin(), c.end(), "GET") != c.end())
-            this->my_Res << "Allow: " << method << "\r\n";
-    }
+    //     ok.parse_server("HTTP/conf");
+    //     c = ok.get_server()[0].get_locations()[this->pos].get_allow_methods();
+    //     if (std::find(c.begin(), c.end(), "GET") != c.end())
+    //         this->my_Res << "Allow: " << method << "\r\n";
+    // }
     stat(error_page.c_str(), &status);
     my_Res_error << "Content-Type: text/html\r\n";
     my_Res_error << "Content-Length: " << status.st_size << "\r\n";
@@ -261,7 +281,7 @@ void                        Response::handle_delete_response(std::string connect
 {
     int fd = -1;
 
-    check_file();
+    // check_file();
     if (remove(this->abs_path.c_str()) < 0)
 	{
 		if (errno == ENOENT)
@@ -283,7 +303,7 @@ void                        Response::handle_delete_response(std::string connect
 
 void                        Response::handle_post_response(std::string connection)
 {
-    check_file();
+    // check_file();
     struct stat         status;
 
     this->my_Res << "HTTP/1.1 201 CREATED\r\n";
@@ -303,15 +323,39 @@ size_t                      Response::get_total_size(void)
     return this->total_size;
 }
 
+std::string                 Response::parsing_check(void)
+{
+    struct stat	status;
+    std::string target_file;
+    std::string my_location_path;
+    std::vector<std::string> location_methods;
+
+    target_file = this->req_target;
+    for(int i=0; i < this->my_servers[0].get_location_count() ; i++)
+    {
+        my_location_path = this->my_servers[0].get_locations()[i].get_location_path();
+        if ((target_file == my_location_path) || (target_file == my_location_path + "/"))
+        {
+            location_methods = this->my_servers[0].get_locations()[i].get_allow_methods();
+            if (std::find(location_methods.begin() , location_methods.end(), this->req_method) == location_methods.end())
+                return "405 Method Not Allowed";
+        }
+        if (this->req_method != "POST" && stat(this->abs_path.c_str(), &status) < 0)
+            return "404 File Not found";
+    }
+    return "";
+}
+
 size_t                      Response::handle_Get_response(void)
 {
     //std::fstream    body_file;
     int fd = -1;
 
     
-    check_file();
+    // check_file();
 
     //body_file.open("my_body.txt", std::ios::out);
+    //std::cout << this->abs_path << std::endl;
     if ((fd = open(this->abs_path.c_str(), O_RDONLY)) < 0)
     {
         if (errno == ENOENT)
@@ -336,6 +380,7 @@ size_t                      Response::handle_Get_response(void)
         this->my_Res << "Date: "<< this->get_date() << "\r\n";
         this->my_Res << "Server: Webserv/4.2.0\r\n";
         stat(this->abs_path.c_str(), &status);
+
         this->total_size = 0;
 		if (S_ISDIR(status.st_mode))
         {
@@ -381,7 +426,7 @@ size_t                      Response::handle_Get_response(void)
                     this->my_Res << "Content-Length: " << status.st_size << "\r\n\r\n";
                     get_body(body);
                     this->set_hello(this->my_Res.str());
-                    std::cout << this->my_Res.str();
+                    //std::cout << this->my_Res.str();
                     this->total_size = this->my_Res.str().size();
                 }
                 return 0;
@@ -423,7 +468,7 @@ size_t                      Response::handle_Get_response(void)
         //exit(0);
         this->set_hello(this->my_Res.str());
         this->total_size = this->my_Res.str().size();
-        std::cout << this->my_Res.str() << std::endl;
+        //std::cout << this->my_Res.str() << std::endl;
         // std::cout << "HERE " << std::endl;
         // exit(0);
         //std::cout << "My size: " << this->my_Res.str().size() << std::endl;
