@@ -141,6 +141,8 @@ size_t              Response::get_body(std::string path)
         body_stream << line;
         line.clear();
     }
+    //std::cout << this->body_size << std::endl;
+   // std::cout << status.st_size << std::endl;
     this->my_Res << body_stream.str();
     
     //body_file << body_stream.str();
@@ -170,8 +172,12 @@ char*                       Response::get_hello()
 }
 void                        Response::set_hello(std::string c)
 {
-    this->hello = (char *)malloc(sizeof(char ) * c.size());
-    memcpy( this->hello, c.c_str(), c.size()); 
+    this->hello = (char *)malloc(sizeof(char ) * c.size() + 1);
+
+    
+    memcpy( this->hello, c.c_str(), c.size());
+    //std::cout << this->hello << std::endl;
+    //strcpy(this->hello, c.c_str());
 }
 
 std::string                Response::check_file(void)
@@ -254,7 +260,7 @@ void               Response::error_handling(std::string error)
     //std::cout << error_page << "|my error" << std::endl;
     my_Res_error << "HTTP/1.1 " << error << std::endl;
     my_Res_error << "Date: "<< this->get_date() << std::endl;
-    my_Res_error << "Server: Webserv/4.0.4" << std::endl;
+    my_Res_error << "Server: Webserv/4.4.0" << std::endl;
 
     // if (Error_ind == "405") //rj3ha 405
     // {
@@ -295,7 +301,7 @@ void                        Response::handle_delete_response(std::string connect
 
         this->my_Res << "HTTP/1.1 204 No Content\r\n";
         this->my_Res << "   Date: "<< this->get_date() << "\r\n";
-        this->my_Res << "Server: Webserv/4.2.0\r\n";
+        this->my_Res << "Server: Webserv/4.4.0\r\n";
         this->my_Res <<"Connection: " << connection  << "\r\n\r\n";
         this->set_hello(this->my_Res.str());
     }
@@ -303,12 +309,11 @@ void                        Response::handle_delete_response(std::string connect
 
 void                        Response::handle_post_response(std::string connection)
 {
-    // check_file();
     struct stat         status;
 
     this->my_Res << "HTTP/1.1 201 CREATED\r\n";
     this->my_Res << "Date: "<< this->get_date() << "\r\n";
-    this->my_Res << "Server: Webserv/4.2.0\r\n";
+    this->my_Res << "Server: Webserv/4.4.0\r\n";
     this->my_Res <<"Connection: " << connection  << "\r\n\r\n";
     this->set_hello(this->my_Res.str());
 }
@@ -346,217 +351,134 @@ std::string                 Response::parsing_check(void)
     return "";
 }
 
-size_t                      Response::handle_Get_response(void)
+int                        Response::check_errors()
 {
-    //std::fstream    body_file;
-    int fd = -1;
+    if (errno == ENOENT)
+        error_handling("404 Not Found");
+    else if (errno == EACCES)
+        error_handling("403 Forbidden");
+    else
+        error_handling("500 Internal Server Error");
+    return 0; 
+}
 
-    
-    // check_file();
+void                        Response::initiate_response(std::string & target_file)
+{
+    this->total_size = 0;
+    target_file  = this->my_servers[0].get_locations()[this->pos].get_location_path();
+    this->my_Res << "HTTP/1.1 200 OK\r\n";
+    this->my_Res << "Date: "<< this->get_date() << "\r\n";
+    this->my_Res << "Server: Webserv/4.2.0\r\n";
+}
 
-    //body_file.open("my_body.txt", std::ios::out);
-    //std::cout << this->abs_path << std::endl;
-    if ((fd = open(this->abs_path.c_str(), O_RDONLY)) < 0)
+int                        Response::handle_dir_response(std::string target_file)
+{
+    if (std::count(target_file.begin(), target_file.end(), '/') > 1)
     {
-        if (errno == ENOENT)
-			error_handling("404 Not Found");
-		else if (errno == EACCES)
-			error_handling("403 Forbidden");
-		else
-			error_handling("500 Internal Server Error");
-         return 0;
+        if (!this->my_servers[0].get_locations()[this->pos].get_autoindex())
+        {
+            error_handling("403 Forbidden");
+            return 0;
+        }
+        if (!check_dir(this->abs_path))
+        {
+            error_handling("500 Internal Server Error");
+            return 0;
+        }
+        this->my_Res << "Content-Type: text/html\r\n";
+        this->my_Res << "Content-Length: " << dir_list.length() << "\r\n\r\n";
+        this->my_Res << this->dir_list;
+        this->set_hello(this->my_Res.str());
+        this->total_size = this->my_Res.str().size();
+        return 0;
     }
     else
     {
-
-        std::string         body;
-        std::string         Error_ind;
-        struct stat         status;
-
-        std::string target_file;
-        
-        target_file  = this->my_servers[0].get_locations()[this->pos].get_location_path();
-        this->my_Res << "HTTP/1.1 200 OK\r\n";
-        this->my_Res << "Date: "<< this->get_date() << "\r\n";
-        this->my_Res << "Server: Webserv/4.2.0\r\n";
-        stat(this->abs_path.c_str(), &status);
-
-        this->total_size = 0;
-		if (S_ISDIR(status.st_mode))
-        {
-            if (target_file != "/")  
-            {
-                if (std::count(target_file.begin(), target_file.end(), '/') > 1)
-                {
-                    if (!this->my_servers[0].get_locations()[this->pos].get_autoindex())
-                    {
-                        error_handling("403 Forbidden");
-                        return 0;
-                    }
-                    if (!check_dir(this->abs_path))
-                    {
-                        error_handling("500 Internal Server Error");
-                        return 0;
-                    }
-                    this->my_Res << "Content-Type: text/html\r\n";
-					this->my_Res << "Content-Length: " << dir_list.length() << "\r\n\r\n";
-                    this->my_Res << this->dir_list;
-                    this->set_hello(this->my_Res.str());
-                    this->total_size = this->my_Res.str().size();
-                    return 0;
-                }
-                else
-                {
-                    error_handling("404 not found");
-                    this->set_hello(this->my_Res.str());
-                    this->total_size = this->my_Res.str().size();
-                    return 0;
-                }
-            }
-            else if (this->my_servers[0].get_locations()[this->pos].get_location_path() == "/")
-            {
-                body = this->my_servers[0].get_locations()[this->pos].get_root() + "/" + this->my_servers[0].get_index()[0];
-                if (stat(body.c_str(), &status) < 0)
-                {
-                    error_handling("403 Forbidden");
-                }
-                else
-                {
-                    this->my_Res << "Content-Type: text/html\r\n";
-                    this->my_Res << "Content-Length: " << status.st_size << "\r\n\r\n";
-                    get_body(body);
-                    this->set_hello(this->my_Res.str());
-                    //std::cout << this->my_Res.str();
-                    this->total_size = this->my_Res.str().size();
-                }
-                return 0;
-            }
-            else
-            {
-                if (!this->my_servers[0].get_locations()[this->pos].get_autoindex())
-                {
-                    error_handling("403 Forbidden");
-                    return 0;
-                }
-                if (!check_dir(this->abs_path))
-				{
-					error_handling("500 Internal Server Error");
-					return 0;
-				}
-                this->my_Res << "Content-Type: text/html\r\n";
-				this->my_Res << "Content-Length: " << dir_list.length() << "\r\n";
-				body = "";
-            }
-        }
-        else
-        {
-            std::string file_type;
-            std::string ok;
-
-            file_type = get_file_type(this->abs_path);
-            //std::cout << this->abs_path << std::endl;
-            this->my_Res << "Content-Type: " << file_type << "\r\n";
-            this->my_Res << "Content-Length: " << status.st_size << "\r\n\r\n";
-            
-           // exit(0);
-            this->body_size = get_body(this->abs_path);
-            
-        }        
-        //this->my_Res << body;
-        //std::cout << body << std::endl;
-        //
-        //exit(0);
+        error_handling("404 not found");
         this->set_hello(this->my_Res.str());
         this->total_size = this->my_Res.str().size();
-        //std::cout << this->my_Res.str() << std::endl;
-        // std::cout << "HERE " << std::endl;
-        // exit(0);
-        //std::cout << "My size: " << this->my_Res.str().size() << std::endl;
+        return 0;
+    }
+    return 0;
+}
+
+int                       Response::handle_special_dir(std::string target_file, struct stat &status, std::string & body)
+{
+    body = this->my_servers[0].get_locations()[this->pos].get_root() + "/" + this->my_servers[0].get_index()[0];
+    if (stat(body.c_str(), &status) < 0)
+    {
+        error_handling("403 Forbidden");
+    }
+    else
+    {
+        this->my_Res << "Content-Type: text/html\r\n";
+        this->my_Res << "Content-Length: " << status.st_size << "\r\n\r\n";
+        get_body(body);
+        this->set_hello(this->my_Res.str());
+        this->total_size = this->my_Res.str().size();
+    }
+    return 0;
+}
+
+int                        Response::handle_dir(std::string target_file, std::string body, struct stat &status)
+{
+    if (target_file != "/")  
+        return handle_dir_response(target_file);
+    else if (this->my_servers[0].get_locations()[this->pos].get_location_path() == "/")
+        return handle_special_dir(target_file, status, body);
+    else
+    {
+        if (!this->my_servers[0].get_locations()[this->pos].get_autoindex())
+        {
+            error_handling("403 Forbidden");
+            return 0;
+        }
+        if (!check_dir(this->abs_path))
+        {
+            error_handling("500 Internal Server Error");
+            return 0;
+        }
+        this->my_Res << "Content-Type: text/html\r\n";
+        this->my_Res << "Content-Length: " << dir_list.length() << "\r\n";
+        body = "";
+        return 1;
+    }
+    return 1;
+}
+
+void                        Response::handle_file(struct stat &status)
+{
+    std::string file_type;
+    std::string ok;
+
+    file_type = get_file_type(this->abs_path);
+    this->my_Res << "Content-Type: " << file_type << "\r\n";
+    this->my_Res << "Content-Length: " << status.st_size << "\r\n\r\n";
+    this->body_size = get_body(this->abs_path);  
+} 
+
+size_t                      Response::handle_Get_response(void)
+{
+    int                 fd;
+    struct stat         status;
+    std::string         target_file;
+    
+    fd = -1;
+    if ((fd = open(this->abs_path.c_str(), O_RDONLY)) < 0)
+        return this->check_errors();
+    else
+    {   
+        initiate_response(target_file);
+        stat(this->abs_path.c_str(), &status);
+		if (S_ISDIR(status.st_mode))
+        {
+            if (!handle_dir(target_file, "", status))
+                return 0;
+        }
+        else
+            handle_file(status);
+        this->set_hello(this->my_Res.str());
+        this->total_size = this->my_Res.str().size();
     }
     return this->body_size;
 }
-
-// int main()
-// {
-//                     // int fd = -1;
-//                     // Response o;
-//                     // std::string     status;
-                    
-//                     // Servers ok("conf");
-//                     // std::cout <<  "HOST IS :"  << ok.get_server()[0].get_host() << std::endl;
-//                     // std::cout << "PORT IS :" << ok.get_server()[0].get_Port() << std::endl;
-//                                     Response ok;
-
-//                                     ok.handle_response();
-//                     // if ((fd = open("/errorsPages/404.html", O_RDONLY)) < 1)
-//                     // {
-//                     //     if (errno == ENOENT)
-//                     //         status = "404 Not found";
-//                     //     else if (errno == EACCES)
-//                     //         status = "403 Forbidden";
-//                     //     else
-//                     //         status = "500 Internal Server Error";
-//                     // }
-//                     // else
-//                     //     status = "200 OK";
-//                     // //printf("%d %d\n", errno, ENOENT);
-//                     // o.error_handling("404 not found");
-//     // Servers ok("conf");
-//     // std::string path = "/PATH03/list/ok.html";
-//     // std::vector <std::string> location_paths;
-    
-
-//     // std::string root_path = "/Desktop/web_server";
-
-//     // std::string               str;
-//     // std::vector <std::string> tokens;
-//     // std::stringstream         check(path);
-
-//     // std::string last;
-
-//     // while(getline(check, str, '/'))
-//     //     tokens.push_back(str);
-    
-//     // for(int i=0; i < ok.get_server()[0].get_locations().size(); i++)
-//     //     location_paths.push_back(ok.get_server()[0].get_locations()[i].get_location_path());
-
-//     // for(int i=0; i < location_paths.size() ; i++)
-//     // {
-//     //     std::cout << location_paths[i] << "----" << tokens[1] << std::endl;
-//     //     if (location_paths[i] == ("/" + tokens[1]))
-//     //         last = ok.get_server()[0].get_locations()[i].get_root() + "/" + tokens[tokens.size() - 1];
-//     // }
-
-//    // std::string location_path = "/PATH03";
-
-//     //std::string last = "/Users/nainhaja/" + root_path + "/" + tokens[tokens.size() - 1];
-
-//                 // int fd = open(last.c_str(), O_RDONLY);
-//                 // std::cout << "|" << last << "|" << std::endl;
-//                 // if (fd < 0)
-//                 //     std::cout << "404 not found" << std::endl;
-//                 // else
-//                 //     std::cout << "200 ok" << std::endl;
-//     // std::string  body = genErrorPage(404, "not found");
-
-//     // std::cout << "HTTP/1.1 " << status << std::endl;
-//     // std::cout << "Date: "<< o.get_date() << std::endl;
-//     // std::cout << "Server: Webserv/4.2.0" << std::endl;
-//     // std::cout << "Content-Type: text/html" << std::endl;
-//     // std::cout << "Content-Length: " << body.size() << std::endl;
-//     // std::cout << "Connection: Closed" << std::endl;
-//     // std::cout << std::endl;
-//     // std::cout << body;
-
-    
-// }
-
-// /*
-//     GET
-//         -() /index.html > read -> string  ) -> body 
-//         -> headers 
-        
-//     POST
-//     DELETE
-
-// */

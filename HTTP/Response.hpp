@@ -30,6 +30,8 @@ class Response
         size_t                          total_size;
         std::string                     req_method;
         std::string                     req_target;
+        std::string                     complete_body;
+        int                             my_body_flag;
     public:
         Response(void);
         Response(std::string File_name);
@@ -56,6 +58,14 @@ class Response
         std::string                 get_request_method(void);
         void                        set_request_target(std::string c);
         std::string                 get_request_target(void);
+        int                         get_body_flag(void);
+        int                         check_errors();
+        void                        initiate_response(std::string & target_file);
+        int                         handle_dir(std::string target_file, std::string body, struct stat &status);
+        void                        handle_file(struct stat &status);
+        std::string                 get_my_res(void);
+        int                         handle_dir_response(std::string target_file);
+        int                         handle_special_dir(std::string target_file, struct stat &status, std::string & body);
         ~Response(void);
 };
 

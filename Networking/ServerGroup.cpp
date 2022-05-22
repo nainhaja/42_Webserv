@@ -132,43 +132,6 @@ void					ServerGroup::start()
 							FD_CLR(i, & _masterfds);
 							FD_SET(i, & _masterwritefds);
 						}
-						//exit(0);
-
-
-						// int ret ; 
-						// //read from connected socket
-						// char buffer[30000];
-						// 	// printf("[%s]÷\n", buffer);
-        				// ret = read( i , buffer, sizeof(buffer)); //3000
-						// /*
-						// 	if (is first)
-						// 		request (buffer)
-						// 	else 
-						// 		request.append(buffer);
-
-						// 		if (request.ifFinshed())
-						// */
-						// std::cout << "Read :" << ret << " " << i  << std::endl;
-						// if (ret == 0 || ret == -1)
-						// {
-						// 	if (ret  == 0)
-						// 	{
-						// 		std::cout << "Connection Closed form client" << std::endl;
-						// 		close(i);
-						// 	FD_CLR(i , &_masterfds);
-
-						// 	}
-						// 	else 
-						// 		perror("in read");
-						// 	//exit(1);
-						// }
-						// else
-						// {
-						// 	FD_CLR(i, & _masterfds);
-						// 	FD_SET(i, & _masterwritefds);
-						// }
-
-
 					}
 					else if (FD_ISSET(i, &_writeset)) // connection is ready to be written to
 					{
@@ -177,12 +140,8 @@ void					ServerGroup::start()
 							body_file << body_stream.str() << std::endl;
 							body_file.close();        
 						}
-
 						if (http.Get_Http_Method() == "POST" && http.get_value("Transfer-Encoding") == "chunked")
-						{
-							std::cout << "ok?" << std::endl;
 							http.handle_chunked_body();
-						}
 						else if (http.Get_Http_Method() == "POST")
 							http.handle_regular_body();
 						Response 	ok;
@@ -204,6 +163,7 @@ void					ServerGroup::start()
 							else if (http.Get_Http_Method() == "POST")
 								ok.handle_post_response(http.get_value("Connection"));							
 						}
+				
        					write(i , ok.get_hello() , ok.get_total_size());
 						FD_CLR(i, & _masterwritefds);
        					close(i);

@@ -12,7 +12,7 @@ class DebugWS
     std::vector<int> getServerPorts()
     {
         std::vector<int> tmp;
-        tmp.push_back(7334);
+        tmp.push_back(7331);
         tmp.push_back(8084);
         // tmp.push_back(4430);
         return tmp;
