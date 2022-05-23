@@ -153,7 +153,7 @@ std::string  Response::genErrorPage(int code, const std::string &msg)
 {
     std::string error_page;
 
-    error_page = this->my_servers[0].get_error(code);
+    error_page = this->my_servers[_index].get_error(code);
     return error_page;
 }
 
@@ -189,18 +189,18 @@ std::string                Response::check_file(void)
     std::vector <std::string> tokens;
     std::stringstream         check(path);
 
-    ok.parse_server("HTTP/conf");
+    ok.parse_server("HTTP/conf");//TODO:change with passed argument 
     while(getline(check, str, '/'))
         tokens.push_back(str);   
-    for(int i=0; i < ok.get_server()[0].get_locations().size(); i++)
-        location_paths.push_back(ok.get_server()[0].get_locations()[i].get_location_path());
+    for(int i=0; i < ok.get_server()[_index].get_locations().size(); i++)
+        location_paths.push_back(ok.get_server()[_index].get_locations()[i].get_location_path());
 
     for(int i=0; i < location_paths.size() ; i++)
     {
         if (location_paths[i] == path)
         {
             this->pos = i;
-            this->abs_path = ok.get_server()[0].get_locations()[i].get_root() + path;
+            this->abs_path = ok.get_server()[_index].get_locations()[i].get_root() + path;
             //std::cout << this->abs_path << std::endl;
             return this->abs_path;
         }            
@@ -269,7 +269,7 @@ void               Response::error_handling(std::string error)
     //     Servers ok;
 
     //     ok.parse_server("HTTP/conf");
-    //     c = ok.get_server()[0].get_locations()[this->pos].get_allow_methods();
+    //     c = ok.get_server()[_index].get_locations()[this->pos].get_allow_methods();
     //     if (std::find(c.begin(), c.end(), "GET") != c.end())
     //         this->my_Res << "Allow: " << method << "\r\n";
     // }
@@ -336,12 +336,13 @@ std::string                 Response::parsing_check(void)
     std::vector<std::string> location_methods;
 
     target_file = this->req_target;
-    for(int i=0; i < this->my_servers[0].get_location_count() ; i++)
+    std::cout << _index << "here \n\n\n\n"<< std::endl;
+    for(int i=0; i < this->my_servers[_index].get_location_count() ; i++)
     {
-        my_location_path = this->my_servers[0].get_locations()[i].get_location_path();
+        my_location_path = this->my_servers[_index].get_locations()[i].get_location_path();
         if ((target_file == my_location_path) || (target_file == my_location_path + "/"))
         {
-            location_methods = this->my_servers[0].get_locations()[i].get_allow_methods();
+            location_methods = this->my_servers[_index].get_locations()[i].get_allow_methods();
             if (std::find(location_methods.begin() , location_methods.end(), this->req_method) == location_methods.end())
                 return "405 Method Not Allowed";
         }
@@ -365,7 +366,7 @@ int                        Response::check_errors()
 void                        Response::initiate_response(std::string & target_file)
 {
     this->total_size = 0;
-    target_file  = this->my_servers[0].get_locations()[this->pos].get_location_path();
+    target_file  = this->my_servers[_index].get_locations()[this->pos].get_location_path();
     this->my_Res << "HTTP/1.1 200 OK\r\n";
     this->my_Res << "Date: "<< this->get_date() << "\r\n";
     this->my_Res << "Server: Webserv/4.2.0\r\n";
@@ -375,7 +376,7 @@ int                        Response::handle_dir_response(std::string target_file
 {
     if (std::count(target_file.begin(), target_file.end(), '/') > 1)
     {
-        if (!this->my_servers[0].get_locations()[this->pos].get_autoindex())
+        if (!this->my_servers[_index].get_locations()[this->pos].get_autoindex())
         {
             error_handling("403 Forbidden");
             return 0;
@@ -404,7 +405,7 @@ int                        Response::handle_dir_response(std::string target_file
 
 int                       Response::handle_special_dir(std::string target_file, struct stat &status, std::string & body)
 {
-    body = this->my_servers[0].get_locations()[this->pos].get_root() + "/" + this->my_servers[0].get_index()[0];
+    body = this->my_servers[_index].get_locations()[this->pos].get_root() + "/" + this->my_servers[_index].get_index()[0];
     if (stat(body.c_str(), &status) < 0)
     {
         error_handling("403 Forbidden");
@@ -424,11 +425,11 @@ int                        Response::handle_dir(std::string target_file, std::st
 {
     if (target_file != "/")  
         return handle_dir_response(target_file);
-    else if (this->my_servers[0].get_locations()[this->pos].get_location_path() == "/")
+    else if (this->my_servers[_index].get_locations()[this->pos].get_location_path() == "/")
         return handle_special_dir(target_file, status, body);
     else
     {
-        if (!this->my_servers[0].get_locations()[this->pos].get_autoindex())
+        if (!this->my_servers[_index].get_locations()[this->pos].get_autoindex())
         {
             error_handling("403 Forbidden");
             return 0;
@@ -481,4 +482,11 @@ size_t                      Response::handle_Get_response(void)
         this->total_size = this->my_Res.str().size();
     }
     return this->body_size;
+}
+
+
+
+void                         Response::setIndex(int i)
+{
+    _index = i;
 }

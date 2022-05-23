@@ -32,6 +32,11 @@ class Response
         std::string                     req_target;
         std::string                     complete_body;
         int                             my_body_flag;
+
+
+
+
+        int                             _index;
     public:
         Response(void);
         Response(std::string File_name);
@@ -67,6 +72,12 @@ class Response
         int                         handle_dir_response(std::string target_file);
         int                         handle_special_dir(std::string target_file, struct stat &status, std::string & body);
         ~Response(void);
+
+
+
+
+
+        void                         setIndex(int i);
 };
 
 #endif 
