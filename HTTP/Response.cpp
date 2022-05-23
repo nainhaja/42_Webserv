@@ -42,10 +42,13 @@ Response::Response(void)
 {
     Servers ok;
 
+    this->max_body_size = 0;
     ok.parse_server("HTTP/conf");
     this->my_servers = ok.get_server();
     this->body_size = 0;
     this->req_method = "";
+    this->my_upload_path = "";
+    
 }
 
 void                     Response::set_request_method(std::string c)
@@ -180,6 +183,16 @@ void                        Response::set_hello(std::string c)
     //strcpy(this->hello, c.c_str());
 }
 
+void                        Response::set_max_body_size(int c)
+{
+    this->max_body_size = c;
+}
+
+int                         Response::get_max_body_size(void)
+{
+    return this->max_body_size;
+}
+
 std::string                Response::check_file(void)
 {
     Servers ok;
@@ -190,11 +203,12 @@ std::string                Response::check_file(void)
     std::stringstream         check(path);
 
     ok.parse_server("HTTP/conf");//TODO:change with passed argument 
+    //std::cout << this->
     while(getline(check, str, '/'))
         tokens.push_back(str);   
     for(int i=0; i < ok.get_server()[_index].get_locations().size(); i++)
         location_paths.push_back(ok.get_server()[_index].get_locations()[i].get_location_path());
-
+    this->max_body_size = ok.get_server()[_index].get_client_max_body_size();
     for(int i=0; i < location_paths.size() ; i++)
     {
         if (location_paths[i] == path)
@@ -283,6 +297,16 @@ void               Response::error_handling(std::string error)
     this->total_size = my_Res_error.str().size();
 }
 
+std::string                 Response::get_my_upload_path(void)
+{
+    return this->my_upload_path;
+}
+
+void                        Response::set_my_upload_path(std::string c)
+{
+    this->my_upload_path = c;
+}
+
 void                        Response::handle_delete_response(std::string connection)
 {
     int fd = -1;
@@ -336,13 +360,14 @@ std::string                 Response::parsing_check(void)
     std::vector<std::string> location_methods;
 
     target_file = this->req_target;
-    std::cout << _index << "here \n\n\n\n"<< std::endl;
+    //std::cout << _index << "here \n\n\n\n"<< std::endl;
     for(int i=0; i < this->my_servers[_index].get_location_count() ; i++)
     {
         my_location_path = this->my_servers[_index].get_locations()[i].get_location_path();
         if ((target_file == my_location_path) || (target_file == my_location_path + "/"))
         {
             location_methods = this->my_servers[_index].get_locations()[i].get_allow_methods();
+            //std::cout << this->my_servers[_index].get_locations()[i].get_client_max_body_size() << " TOTAL2" << std::endl;
             if (std::find(location_methods.begin() , location_methods.end(), this->req_method) == location_methods.end())
                 return "405 Method Not Allowed";
         }

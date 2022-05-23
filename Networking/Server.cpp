@@ -79,10 +79,7 @@ int		Server::send(int sock)
 		bd->_http.handle_regular_body();
 
 
-
-
-
-
+	
 	if (it->second->_startedwrite == false)
 	{
 		it->second->_startedwrite = true;
@@ -95,24 +92,31 @@ int		Server::send(int sock)
 	bd->_ok.set_request_method(bd->_http.Get_Http_Method());
 	bd->_ok.set_request_target(bd->_http.Get_Request_Target());
 
-
+	
 	bd->_ok.set_mybuffer(bd->_http.Get_Request_Target());
 
 	bd->_ok.check_file();
 	error_msg = bd->_ok.parsing_check();
-
-	if (error_msg != "")
-		bd->_ok.error_handling(error_msg);
+	if (bd->_ok.get_max_body_size() < 0)
+	{
+		bd->_ok.error_handling("500 Webservice currently unavailable");
+	}
+	else if (bd->_http.get_total_size() > bd->_ok.get_max_body_size() && bd->_ok.get_max_body_size() != 0)
+		bd->_ok.error_handling("413 Payload Too Large");
 	else
 	{
-		if (bd->_http.Get_Http_Method() == "GET")
-			bd->_body_size = bd->_ok.handle_Get_response();
-		else if (bd->_http.Get_Http_Method() == "DELETE")
-			bd->_ok.handle_delete_response(bd->_http.get_value("Connection"));
-		else if (bd->_http.Get_Http_Method() == "POST")
-			bd->_ok.handle_post_response(bd->_http.get_value("Connection"));
-	}
-
+		if (error_msg != "")
+			bd->_ok.error_handling(error_msg);
+		else
+		{
+			if (bd->_http.Get_Http_Method() == "GET")
+				bd->_body_size = bd->_ok.handle_Get_response();
+			else if (bd->_http.Get_Http_Method() == "DELETE")
+				bd->_ok.handle_delete_response(bd->_http.get_value("Connection"));
+			else if (bd->_http.Get_Http_Method() == "POST")
+				bd->_ok.handle_post_response(bd->_http.get_value("Connection"));
+		}		
+	}	
 	bd->_writecount += write(sock , bd->_ok.get_hello() + bd->_writecount , bd->_ok.get_total_size() - bd->_writecount);
 
 
@@ -138,6 +142,7 @@ int		Server::recv(int sock)
 	}
 	_body *bd = it->second;
 	flag = bd->_http.handle_http_request(sock, bd->_body_file, bd->_body_size, bd->_body_stream);
+	//std::cout << bd->_http.get_total_size() << " TOTAL" << std::endl;
 	//it->second->handle_http_request(sock, _body_file, _body_size, _body_stream);
 	//http.handle_http_request(sock, _body_file, _body_size, _body_stream);
 	return flag;

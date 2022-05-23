@@ -295,7 +295,7 @@ int            HttpRequest::handle_http_request(int new_socket, std::fstream & b
         }
         else
             return 0;
-        data.clear(); 
+        data.clear();
         return 1;
     //}
     // if (this->Http_Method == "POST")
