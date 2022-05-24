@@ -129,7 +129,8 @@ void            HttpRequest::handle_regular_body(void)
     result_file.open(this->get_my_upload_path() + "res" + file_type, std::ios::out);
     //result_file.open("res" + file_type, std::ios::out);
     while(getline(file_2, str))
-        result_file << str + "\n";   
+        result_file << str + "\n";
+    result_file.close();  
 }
 
 std::string     HttpRequest::get_file_type(void)
@@ -183,6 +184,8 @@ void            HttpRequest::handle_chunked_body(void)
             count_size = 0;
         }
     }
+    result_file.close();
+    out_file.close();
 }
 
 HttpRequest::HttpRequest(void)

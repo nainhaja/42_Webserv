@@ -112,7 +112,7 @@ std::string              Response::get_error_body(std::string path)
         line.clear();
     }
     my_Res_error << body_stream.str();
-    
+    close(fd);
     //body_file << body_stream.str();
     return my_Res_error.str();
 }
@@ -147,7 +147,7 @@ size_t              Response::get_body(std::string path)
     //std::cout << this->body_size << std::endl;
    // std::cout << status.st_size << std::endl;
     this->my_Res << body_stream.str();
-    
+    close(fd);
     //body_file << body_stream.str();
     return this->body_size;
 }
@@ -499,13 +499,17 @@ size_t                      Response::handle_Get_response(void)
 		if (S_ISDIR(status.st_mode))
         {
             if (!handle_dir(target_file, "", status))
+            {
+                close(fd);
                 return 0;
+            }
         }
         else
             handle_file(status);
         this->set_hello(this->my_Res.str());
         this->total_size = this->my_Res.str().size();
     }
+    close(fd);
     return this->body_size;
 }
 
