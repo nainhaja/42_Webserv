@@ -73,10 +73,10 @@ int		Server::send(int sock)
 		bd->_body_file << bd->_body_stream.str() << std::endl;
 		bd->_body_file.close();        
 	}
-	if (bd->_http.Get_Http_Method() == "POST" && bd->_http.get_value("Transfer-Encoding") == "chunked")
-		bd->_http.handle_chunked_body();
-	else if (bd->_http.Get_Http_Method() == "POST")
-		bd->_http.handle_regular_body();
+	// if (bd->_http.Get_Http_Method() == "POST" && bd->_http.get_value("Transfer-Encoding") == "chunked")
+	// 	bd->_http.handle_chunked_body();
+	// else if (bd->_http.Get_Http_Method() == "POST")
+	// 	bd->_http.handle_regular_body();
 
 
 	
@@ -94,9 +94,17 @@ int		Server::send(int sock)
 
 	
 	bd->_ok.set_mybuffer(bd->_http.Get_Request_Target());
-
+	
+	
 	bd->_ok.check_file();
 	error_msg = bd->_ok.parsing_check();
+	bd->_http.set_my_upload_path(bd->_ok.get_my_upload_path());
+
+	//std::cout << bd->_http.get_my_upload_path() << std::endl;
+	if (bd->_http.Get_Http_Method() == "POST" && bd->_http.get_value("Transfer-Encoding") == "chunked")
+		bd->_http.handle_chunked_body();
+	else if (bd->_http.Get_Http_Method() == "POST")
+		bd->_http.handle_regular_body();
 	if (bd->_ok.get_max_body_size() < 0)
 	{
 		bd->_ok.error_handling("500 Webservice currently unavailable");

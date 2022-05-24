@@ -44,6 +44,16 @@ std::map<std::string, std::string> HttpRequest::Parse_Map(std::string buff)
     return my_map;
 }
 
+std::string                 HttpRequest::get_my_upload_path(void)
+{
+    return this->my_upload_path;
+}
+
+void                        HttpRequest::set_my_upload_path(std::string c)
+{
+    this->my_upload_path = c;
+}
+
 int hexadecimalToDecimal(std::string hexVal)
 {
     int len = hexVal.size();
@@ -115,7 +125,9 @@ void            HttpRequest::handle_regular_body(void)
     std::string     file_type;
 
     file_type = this->get_file_type();
-    result_file.open("res" + file_type, std::ios::out);
+    std::cout << get_my_upload_path() << std::endl;
+    result_file.open(this->get_my_upload_path() + "res" + file_type, std::ios::out);
+    //result_file.open("res" + file_type, std::ios::out);
     while(getline(file_2, str))
         result_file << str + "\n";   
 }
@@ -148,7 +160,7 @@ void            HttpRequest::handle_chunked_body(void)
     std::fstream    out_file;
     file_type =  this->get_file_type();
     out_file.open("my_res", std::ios::out);
-    result_file.open("res" + file_type, std::ios::out);
+    result_file.open(this->get_my_upload_path() + "res" + file_type, std::ios::out);
     while(getline(file_2, str))
     {
         if (!hex_flag)

@@ -311,7 +311,6 @@ void                        Response::handle_delete_response(std::string connect
 {
     int fd = -1;
 
-    // check_file();
     if (remove(this->abs_path.c_str()) < 0)
 	{
 		if (errno == ENOENT)
@@ -324,9 +323,9 @@ void                        Response::handle_delete_response(std::string connect
         struct stat         status;
 
         this->my_Res << "HTTP/1.1 204 No Content\r\n";
-        this->my_Res << "   Date: "<< this->get_date() << "\r\n";
+        this->my_Res << "Date: "<< this->get_date() << "\r\n";
         this->my_Res << "Server: Webserv/4.4.0\r\n";
-        this->my_Res <<"Connection: " << connection  << "\r\n\r\n";
+        this->my_Res << "Connection: " << connection  << "\r\n\r\n";
         this->set_hello(this->my_Res.str());
     }
 }
@@ -364,6 +363,7 @@ std::string                 Response::parsing_check(void)
     for(int i=0; i < this->my_servers[_index].get_location_count() ; i++)
     {
         my_location_path = this->my_servers[_index].get_locations()[i].get_location_path();
+        this->my_upload_path = this->my_servers[_index].get_upload_path();
         if ((target_file == my_location_path) || (target_file == my_location_path + "/"))
         {
             location_methods = this->my_servers[_index].get_locations()[i].get_allow_methods();

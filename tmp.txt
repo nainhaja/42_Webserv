@@ -1,0 +1,8 @@
+DELETE /body.png HTTP/1.1
+Host: localhost:8080
+User-Agent: PostmanRuntime/7.29.0
+Accept: */*
+Postman-Token: 6454b7dc-44ce-4369-a888-28f5102b2927
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+

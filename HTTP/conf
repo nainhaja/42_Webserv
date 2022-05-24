@@ -3,7 +3,7 @@ Server {
     root             ./HTTP
     allow_methods      GET POST 
 
-    upload_path        /somewhere/ 
+    upload_path        ./HTTP/PATH03/
 
     index index.html index.php 
     
@@ -16,24 +16,21 @@ Server {
     error_page      500 ./HTTP/error_pages/500.html
     autoindex off
 
-    redirection    /doooooxsxvasvf /test/
-    
     
 
 
     location {
         root ./HTTP
-        path /PATH03/ok.png
+        path /
         autoindex on
-        allow_methods  GET POST
+        allow_methods  POST GET
     }
     
-
     location {
         root ./HTTP
-        path /PATH03/index.html
+        path /PATH03/res.png
         autoindex on
-        allow_methods GET  POST
+        allow_methods DELETE POST GET
     } 
     cgi .php
     {
@@ -41,7 +38,6 @@ Server {
         cgi_path         /Volumes/SPYDERSY/webserv/cgi-bin/php-cgi
     }
 
-    client_max_body_size 2005
 }
 
 Server {
