@@ -1,5 +1,5 @@
 Server {
-    listen             127.0.0.1 8081
+    listen             127.0.0.1 8083
     root             ./HTTP
     allow_methods      GET POST 
 
@@ -21,14 +21,14 @@ Server {
 
     location {
         root ./HTTP
-        path /
+        path /PATH03/index.html
         autoindex on
         allow_methods  POST GET
     }
     
     location {
         root ./HTTP
-        path /PATH03/res.png
+        path /PATH03/body.png
         autoindex on
         allow_methods DELETE POST GET
     } 
@@ -41,7 +41,7 @@ Server {
 }
 
 Server {
-    listen             127.0.0.1 8085
+    listen             127.0.0.1 8084
     root             ./HTTP
     allow_methods      GET POST 
 

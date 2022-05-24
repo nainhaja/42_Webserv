@@ -1,7 +1,7 @@
 #include "Server.hpp"
 
 
-
+// print("Content-type:text\html")
 /*
 ** --------------------------------- METHODS ----------------------------------
 */
@@ -67,7 +67,7 @@ int		Server::send(int sock)
 	bd = it->second;
 	
 	
-
+	
 	if (bd->_http.Get_Http_Method() == "POST")
 	{
 		bd->_body_file << bd->_body_stream.str() << std::endl;

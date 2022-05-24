@@ -92,7 +92,7 @@ void					ServerGroup::start()
 	struct timeval	timetostop;
 	timetostop.tv_sec  = 1;
 	timetostop.tv_usec = 0;
-
+	signal(SIGPIPE, SIG_IGN);
 	while (true)
 	{
 		_readset = _masterfds;
@@ -141,11 +141,16 @@ void					ServerGroup::start()
 						}
 
 						flag = (it)->second->recv(i);
-						if (!flag)
+						if (flag <= 0) /// EDIT 
 						{
 							FD_CLR(i, & _masterfds);
 							FD_SET(i, & _masterwritefds);
 						}
+						// if (!flag) /// EDIT 
+						// {
+						// 	FD_CLR(i, & _masterfds);
+						// 	FD_SET(i, & _masterwritefds);
+						// }
 					}
 					else if (FD_ISSET(i, &_writeset)) // connection is ready to be written to
 					{
