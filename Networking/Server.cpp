@@ -150,6 +150,8 @@ int		Server::recv(int sock)
 	}
 	_body *bd = it->second;
 	flag = bd->_http.handle_http_request(sock, bd->_body_file, bd->_body_size, bd->_body_stream);
+	// std::cout << "My host is " << bd->_http.get_my_host() << std::endl;
+	// std::cout << "My port is " << bd->_http.get_my_port() << std::endl;
 	//std::cout << bd->_http.get_total_size() << " TOTAL" << std::endl;
 	//it->second->handle_http_request(sock, _body_file, _body_size, _body_stream);
 	//http.handle_http_request(sock, _body_file, _body_size, _body_stream);

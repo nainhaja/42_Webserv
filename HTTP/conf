@@ -1,5 +1,5 @@
 Server {
-    listen             127.0.0.1 8083
+    listen             127.0.0.1 8081
     root             ./HTTP
     allow_methods      GET POST 
 
@@ -21,7 +21,7 @@ Server {
 
     location {
         root ./HTTP
-        path /PATH03/index.html
+        path /PATH03/vid.mp4
         autoindex on
         allow_methods  POST GET
     }
@@ -41,7 +41,7 @@ Server {
 }
 
 Server {
-    listen             127.0.0.1 8084
+    listen             127.0.0.1 8087
     root             ./HTTP
     allow_methods      GET POST 
 

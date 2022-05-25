@@ -21,6 +21,8 @@ class HttpRequest
         std::string                         tranfer_encoding;
         size_t                              total_size;
         std::string                         my_upload_path;
+        std::string                         my_host;
+        int                                 my_port;
     public:
         HttpRequest(void);
         std::map<std::string, std::string>    Parse_Map(std::string buff);
@@ -41,6 +43,11 @@ class HttpRequest
         std::string     get_file_type(void);
         void            set_header(std::map<std::string, std::string> c);
         size_t          get_total_size(void);
+        void            store_header_vars(std::string req_handle, std::ostringstream & body_stream);
+        int             store_body_content(size_t &body_size, std::ostringstream & body_stream, std::string & data, int red);
+        int             read_data_from_fd(int & valread, std::string & data, int new_socket);
+        std::string     get_my_host(void);
+        int             get_my_port(void);
         ~HttpRequest(void);
 };
 //body_file
