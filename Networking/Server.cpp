@@ -21,9 +21,8 @@ int Server::Create()
 	if (bind(_fd, (struct sockaddr * ) &_addr, sizeof(_addr)) == -1)
 		throw BindException();
 	
-	if (listen(_fd, 10000) < 0)
-		throw ListenException();
-
+	if (listen(_fd, 1000) < 0)
+		throw ListenException();// 1000 10000 EDIT
 	std::cout <<  "SERVER FD : " << _fd << std::endl;
 
 	return (0);
@@ -65,69 +64,50 @@ int		Server::send(int sock)
 	_body *bd;
 
 	bd = it->second;
-	
-	
-	
-	if (bd->_http.Get_Http_Method() == "POST")
-	{
-		bd->_body_file << bd->_body_stream.str() << std::endl;
-		bd->_body_file.close();        
-	}
-	// if (bd->_http.Get_Http_Method() == "POST" && bd->_http.get_value("Transfer-Encoding") == "chunked")
-	// 	bd->_http.handle_chunked_body();
-	// else if (bd->_http.Get_Http_Method() == "POST")
-	// 	bd->_http.handle_regular_body();
+	std::string	my_method;
+	std::string	my_chunk;
+	int			my_len;
+	std::string	error_msg;
+	std::string	request_target;
+	std::string	red_target;
 
-
+	bd->init_values(my_method, my_chunk, _index, my_len, request_target);
 	
 	if (it->second->_startedwrite == false)
-	{
 		it->second->_startedwrite = true;
-	}
-
-
-
-	bd->_ok.setIndex(_index);
-	std::string	error_msg;
-	bd->_ok.set_request_method(bd->_http.Get_Http_Method());
-	bd->_ok.set_request_target(bd->_http.Get_Request_Target());
-
-	
-	bd->_ok.set_mybuffer(bd->_http.Get_Request_Target());
-	
-	
-	bd->_ok.check_file();
-	error_msg = bd->_ok.parsing_check();
-	bd->_http.set_my_upload_path(bd->_ok.get_my_upload_path());
-
-	//std::cout << bd->_http.get_my_upload_path() << std::endl;
-	if (bd->_http.Get_Http_Method() == "POST" && bd->_http.get_value("Transfer-Encoding") == "chunked")
-		bd->_http.handle_chunked_body();
-	else if (bd->_http.Get_Http_Method() == "POST")
-		bd->_http.handle_regular_body();
-	if (bd->_ok.get_max_body_size() < 0)
+	red_target = request_target.substr(request_target.find_last_of("/") + 1, request_target.size());
+	//std::cout << "Target is " << red_target << std::endl;
+	// std::cout << "redirect is " << bd->_ok.get_redirect_path() << std::endl;
+	if (bd->_ok.get_server(_index).get_redirection_value(red_target))
 	{
-		bd->_ok.error_handling("500 Webservice currently unavailable");
+		request_target = red_target;
+		bd->_ok.set_request_target(request_target);
+		//std::cout << "WSELT HNA ANAAAAAA"<< std::endl;
+		bd->_ok.handle_redirect_response(bd->_http.get_value("Connection"));
 	}
-	else if (bd->_http.get_total_size() > bd->_ok.get_max_body_size() && bd->_ok.get_max_body_size() != 0)
-		bd->_ok.error_handling("413 Payload Too Large");
+	else if (my_method == "POST" && ((my_len < 0) || (bd->_body_stream.str() == "" && my_len != 0)))
+		bd->_ok.error_handling("400 Bad Request");
 	else
 	{
-		if (error_msg != "")
-			bd->_ok.error_handling(error_msg);
+		if (!bd->handle_body(my_method, my_chunk, error_msg, my_len))
+			bd->_ok.error_handling("400 Bad Request");
 		else
 		{
-			if (bd->_http.Get_Http_Method() == "GET")
-				bd->_body_size = bd->_ok.handle_Get_response();
-			else if (bd->_http.Get_Http_Method() == "DELETE")
-				bd->_ok.handle_delete_response(bd->_http.get_value("Connection"));
-			else if (bd->_http.Get_Http_Method() == "POST")
-				bd->_ok.handle_post_response(bd->_http.get_value("Connection"));
-		}		
-	}	
+			if (bd->_ok.get_max_body_size() < 0)
+				bd->_ok.error_handling("500 Webservice currently unavailable");
+			else if (bd->_http.get_total_size() > bd->_ok.get_max_body_size() && bd->_ok.get_max_body_size() != 0)
+				bd->_ok.error_handling("413 Payload Too Large");
+			else
+			{
+				if (error_msg != "")
+					bd->_ok.error_handling(error_msg);
+				else
+					bd->handle_response(my_method);
+			}			
+		}
+	}
 	bd->_writecount += write(sock , bd->_ok.get_hello() + bd->_writecount , bd->_ok.get_total_size() - bd->_writecount);
-
-
+	bd->close_file();
 	if (bd->_ok.get_total_size() <= bd->_writecount)
 	{
 		_requestmap.erase(it);
@@ -150,6 +130,7 @@ int		Server::recv(int sock)
 	}
 	_body *bd = it->second;
 	flag = bd->_http.handle_http_request(sock, bd->_body_file, bd->_body_size, bd->_body_stream);
+	//std::cout << "Hello" << std::endl;
 	// std::cout << "My host is " << bd->_http.get_my_host() << std::endl;
 	// std::cout << "My port is " << bd->_http.get_my_port() << std::endl;
 	//std::cout << bd->_http.get_total_size() << " TOTAL" << std::endl;

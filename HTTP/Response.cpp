@@ -107,11 +107,16 @@ std::string              Response::get_error_body(std::string path)
     return my_Res_error.str();
 }
 
+Conf                Response::get_server(int index)
+{
+    return this->my_servers[index];
+}
+
 size_t              Response::get_body(std::string path)
 {
     std::string         line;
     int                 len;
-    char                buffer[30000] = {0};
+    char                buffer[5000] = {0};
     struct stat         status;
     int                 fd;
 
@@ -120,12 +125,16 @@ size_t              Response::get_body(std::string path)
     stat(path.c_str(), &status);
     while(this->body_size < status.st_size)
     {
-        len = read(fd, &buffer, 3000);
+        len = read(fd, buffer, sizeof(buffer));
+        if (len <= 0)
+            break;
+        std::cout << len << std::endl;
+        std::cout << sizeof(buffer) << std::endl;
         this->body_size += len;
         for (size_t i = 0; i < len; i++)
-            line += buffer[i];
-        this->my_Res << line;
-        line.clear();
+            this->my_Res << buffer[i];
+        //this->my_Res << line;
+        //line.clear();
     }
     close(fd);
     return this->body_size;
@@ -135,7 +144,14 @@ std::string  Response::genErrorPage(int code, const std::string &msg)
 {
     std::string error_page;
 
+    std::cout << "REACHED HEEEERE 1"<< std::endl;
+    std::cout << code << std::endl;
+    std::cout << msg << std::endl;
+    std::cout << _index << std::endl;
+    std::cout << this->my_servers[_index].get_error(404) << std::endl;
     error_page = this->my_servers[_index].get_error(code);
+    std::cout << error_page << std::endl;
+    std::cout << "REACHED HEEEERE 2"<< std::endl;
     return error_page;
 }
 
@@ -287,15 +303,43 @@ void                        Response::handle_delete_response(std::string connect
     }
 }
 
+void                        Response::set_redirect_path(std::string c)
+{
+    this->redirect_path = c;
+}
+
+std::string                 Response::get_redirect_path(void)
+{
+    return this->redirect_path;
+}
+
+void                        Response::handle_redirect_response(std::string c)
+{
+    struct stat         status;
+
+    this->my_Res << "HTTP/1.1 301 Moved Permanently\r\n";
+    this->my_Res << "Date: "<< this->get_date() << "\r\n";
+    this->my_Res << "Server: Webserv/4.4.0\r\n";
+    this->my_Res << "Location: " << "https://" + this->get_request_target() + "/"  << "\r\n"; 
+    this->my_Res << "Connection: close" << "\r\n\r\n";
+    this->total_size = this->my_Res.str().size();
+    std::cout << this->my_Res.str() << std::endl;
+    //std::cout << this->my_Res.str() << std::endl;
+    this->set_hello(this->my_Res.str());    
+}
+
 void                        Response::handle_post_response(std::string connection)
 {
     struct stat         status;
 
-    this->my_Res << "HTTP/1.1 201 CREATED\r\n";
+    this->my_Res << "HTTP/1.1 201 Created\r\n";
     this->my_Res << "Date: "<< this->get_date() << "\r\n";
     this->my_Res << "Server: Webserv/4.4.0\r\n";
-    this->my_Res <<"Connection: " << connection  << "\r\n\r\n";
-    this->set_hello(this->my_Res.str());
+    this->my_Res << "Location: " << this->get_my_upload_path() + "\r\n"; 
+    this->my_Res << "Connection: " << connection  << "\r\n\r\n";
+    this->total_size = this->my_Res.str().size();
+    //std::cout << this->my_Res.str() << std::endl;
+    this->set_hello(this->my_Res.str());    
 }
 
 size_t                      Response::get_body_size(void)
@@ -444,22 +488,20 @@ size_t                      Response::handle_Get_response(void)
         return this->check_errors();
     else
     {   
+        close(fd);
         initiate_response(target_file);
         stat(this->abs_path.c_str(), &status);
 		if (S_ISDIR(status.st_mode))
         {
             if (!handle_dir(target_file, "", status))
-            {
-                close(fd);
                 return 0;
-            }
         }
         else
             handle_file(status);
         this->set_hello(this->my_Res.str());
         this->total_size = this->my_Res.str().size();
     }
-    close(fd);
+    
     return this->body_size;
 }
 

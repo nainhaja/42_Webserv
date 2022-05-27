@@ -141,11 +141,17 @@ void					ServerGroup::start()
 						}
 
 						flag = (it)->second->recv(i);
-						if (flag <= 0) /// EDIT 
+						if (flag <= 0) /// EDIT  <=
 						{
 							FD_CLR(i, & _masterfds);
 							FD_SET(i, & _masterwritefds);
 						}
+						//else if (flag < 0) // ADDED to check error of read
+						//{
+						//	_client_fds.erase(it);
+						//	FD_CLR(i, & _masterfds);
+       					//	close(i);
+						//}
 						// if (!flag) /// EDIT 
 						// {
 						// 	FD_CLR(i, & _masterfds);

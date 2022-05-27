@@ -1,5 +1,5 @@
 Server {
-    listen             127.0.0.1 8081
+    listen             127.0.0.1 8082
     root             ./HTTP
     allow_methods      GET POST 
 
@@ -11,17 +11,19 @@ Server {
 
     error_page      404 ./HTTP/error_pages/404.html
     error_page      403 ./HTTP/error_pages/403.html
+    error_page      400 ./HTTP/error_pages/400.html
     error_page      405 ./HTTP/error_pages/405.html
     error_page      413 ./HTTP/error_pages/413.html
     error_page      500 ./HTTP/error_pages/500.html
     autoindex off
 
     
-
+    redirection    /youtube www.youtube.com
+    redirection    /ok 3yqti
 
     location {
         root ./HTTP
-        path /PATH03/vid.mp4
+        path /PATH03/nadi.png
         autoindex on
         allow_methods  POST GET
     }
@@ -31,7 +33,15 @@ Server {
         path /PATH03/body.png
         autoindex on
         allow_methods DELETE POST GET
-    } 
+    }
+
+    location {
+        root ./HTTP
+        path /PATH03/index.html
+        autoindex on
+        allow_methods DELETE POST GET
+    }
+
     cgi .php
     {
         allow_methods      POST
@@ -52,7 +62,9 @@ Server {
     error_page      404 ./HTTP/error_pages/404.html
     error_page      403 ./HTTP/error_pages/403.html
     error_page      405 ./HTTP/error_pages/405.html
+    error_page      400 ./HTTP/error_pages/400.html
     error_page      500 ./HTTP/error_pages/500.html
+    error_page      413 ./HTTP/error_pages/413.html
     autoindex off
 
     redirection    /doooooxsxvasvf /test/
