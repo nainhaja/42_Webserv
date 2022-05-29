@@ -100,9 +100,9 @@ class Server
 					request_target = this->_http.Get_Request_Target();
 					// std::cout << request_target << "HANA ASAT WTF" << std::endl;
 					this->_ok.setIndex(index);
-					// if (this->_ok.get_server(index).get_redirection_value(request_target) != "")
+					// if (this->_ok.get_server(index).get_redirection_value(request_target))
 					// 	this->_red_flag = 1;
-					//this->_ok.set_redirect_path(this->_ok.get_server(index).get_redirection_value(request_target));
+					//this->_ok.set_redirect_path(this->_ok.get_server(index).get_redirection(request_target));
 				}
 				// int					get_red_flag()
 				// {

@@ -359,10 +359,8 @@ void                        Response::handle_post_response(std::string connectio
     // this->my_Res << "0\r\n\r\n" << std::endl;
 
     this->total_size = this->my_Res.str().size();
-    //std::cout << this->my_Res.str() << std::endl;
-    // std::cout << this->get_my_upload_path() << std::endl;
-    // std::cout << "handle_post_response" << std::endl;
-    this->set_hello(this->my_Res.str());    
+    std::cout << this->my_Res.str() << std::endl;
+    this->set_hello(this->my_Res.str());
 }
 
 size_t                      Response::get_body_size(void)

@@ -63,7 +63,7 @@ int		Server::send(int sock)
 
 	_body *bd;
 
-
+	///Method not allowed error // 
 	bd = it->second;
 	std::string	my_method;
 	std::string	my_chunk;
@@ -76,11 +76,16 @@ int		Server::send(int sock)
 	
 	if (it->second->_startedwrite == false)
 		it->second->_startedwrite = true;
+	//std::cout << red_target << std::endl;
 	red_target = request_target.substr(request_target.find_last_of("/") + 1, request_target.size());
-	if (bd->_ok.get_server(_index).get_redirection_value(red_target))
+	//std::cout << red_target << std::endl;
+	red_target = bd->_ok.get_server(_index).get_redirection_value(red_target);
+	//td::cout << red_target << std::endl;
+	if (red_target != "")
 	{
-		request_target = red_target;
-		bd->_ok.set_request_target(request_target);
+		//std::cout << "Here " << std::endl;
+		//request_target = red_target;
+		bd->_ok.set_request_target(red_target);
 		bd->_ok.handle_redirect_response(bd->_http.get_value("Connection"));
 	}
 	else if (my_method == "POST" && ((my_len < 0) || (bd->_body_stream.str() == "" && my_len != 0)))
@@ -107,8 +112,8 @@ int		Server::send(int sock)
 	}
 
 	bd->_writecount += write(sock , bd->_ok.get_hello() + bd->_writecount , bd->_ok.get_total_size() - bd->_writecount);
-	//bd->_ok.clear();
-	//bd->close_file();
+	bd->_ok.clear();
+	bd->close_file();
 	//delete[] bd;
 	if (bd->_ok.get_total_size() <= bd->_writecount)
 	{
