@@ -98,8 +98,7 @@ void               Servers::parse_server(std::string name)
             if (my_conf->get_location_block() == 1)
             {
                 my_conf->parse_location(tokens, *ok);
-            }
-                
+            }                
             else if (my_conf->get_cgi_block() == 1)
                 my_conf->parse_Cgi(tokens, ok_cgi);
             else
@@ -107,6 +106,8 @@ void               Servers::parse_server(std::string name)
             empty_line = 0;        
         }
     }
+    delete ok;
+    delete my_conf;
     file.close();
 }
 

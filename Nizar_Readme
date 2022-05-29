@@ -31,9 +31,10 @@ STEP3:
 #HOW_to_ACCESS_cgi_vars:
 
 Step1 : 
-            Servers ok;
-
-            ok.parse_server("HTTP/conf");
+            _body *bd;
+        
+            bd->_http; 
+            
 
 Step2:
             Conf                    my_conf; #JUST ONE AND ONLY CONF 

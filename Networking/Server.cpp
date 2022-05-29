@@ -63,6 +63,7 @@ int		Server::send(int sock)
 
 	_body *bd;
 
+
 	bd = it->second;
 	std::string	my_method;
 	std::string	my_chunk;
@@ -76,13 +77,10 @@ int		Server::send(int sock)
 	if (it->second->_startedwrite == false)
 		it->second->_startedwrite = true;
 	red_target = request_target.substr(request_target.find_last_of("/") + 1, request_target.size());
-	//std::cout << "Target is " << red_target << std::endl;
-	// std::cout << "redirect is " << bd->_ok.get_redirect_path() << std::endl;
 	if (bd->_ok.get_server(_index).get_redirection_value(red_target))
 	{
 		request_target = red_target;
 		bd->_ok.set_request_target(request_target);
-		//std::cout << "WSELT HNA ANAAAAAA"<< std::endl;
 		bd->_ok.handle_redirect_response(bd->_http.get_value("Connection"));
 	}
 	else if (my_method == "POST" && ((my_len < 0) || (bd->_body_stream.str() == "" && my_len != 0)))
@@ -103,11 +101,15 @@ int		Server::send(int sock)
 					bd->_ok.error_handling(error_msg);
 				else
 					bd->handle_response(my_method);
+				
 			}			
 		}
 	}
+
 	bd->_writecount += write(sock , bd->_ok.get_hello() + bd->_writecount , bd->_ok.get_total_size() - bd->_writecount);
-	bd->close_file();
+	//bd->_ok.clear();
+	//bd->close_file();
+	//delete[] bd;
 	if (bd->_ok.get_total_size() <= bd->_writecount)
 	{
 		_requestmap.erase(it);
@@ -130,12 +132,6 @@ int		Server::recv(int sock)
 	}
 	_body *bd = it->second;
 	flag = bd->_http.handle_http_request(sock, bd->_body_file, bd->_body_size, bd->_body_stream);
-	//std::cout << "Hello" << std::endl;
-	// std::cout << "My host is " << bd->_http.get_my_host() << std::endl;
-	// std::cout << "My port is " << bd->_http.get_my_port() << std::endl;
-	//std::cout << bd->_http.get_total_size() << " TOTAL" << std::endl;
-	//it->second->handle_http_request(sock, _body_file, _body_size, _body_stream);
-	//http.handle_http_request(sock, _body_file, _body_size, _body_stream);
 	return flag;
 }
 

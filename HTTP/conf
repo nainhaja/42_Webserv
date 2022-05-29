@@ -1,11 +1,9 @@
 Server {
-    listen             127.0.0.1 8082
+    listen             127.0.0.1 8083
     root             ./HTTP
     allow_methods      GET POST 
 
     upload_path        ./HTTP/PATH03/
-
-    index index.html index.php 
     
     server_name       example.com
 
@@ -18,9 +16,10 @@ Server {
     autoindex off
 
     
-    redirection    /youtube www.youtube.com
+    redirection    /youtube             www.youtube.com
     redirection    /ok 3yqti
 
+    
     location {
         root ./HTTP
         path /PATH03/nadi.png
@@ -28,6 +27,12 @@ Server {
         allow_methods  POST GET
     }
     
+    location {
+        root ./HTTP
+        path /  
+        autoindex off
+        allow_methods  POST GET
+    }
     location {
         root ./HTTP
         path /PATH03/body.png
@@ -51,7 +56,7 @@ Server {
 }
 
 Server {
-    listen             127.0.0.1 8087
+    listen             127.0.0.1 8089
     root             ./HTTP
     allow_methods      GET POST 
 
