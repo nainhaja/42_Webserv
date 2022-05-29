@@ -73,7 +73,7 @@ class Server
 				}
 				~_body()
 				{
-					_body_file.close();
+					//_body_file.close();
 				}
 				HttpRequest			_http;
 				std::ostringstream  _body_stream;
@@ -129,8 +129,8 @@ class Server
 							this->_body_size = this->_http.handle_chunked_body();
 						else
 							this->_http.handle_regular_body();
-						if (this->_body_size - 1 > my_len && my_len >= 0)
-							return 0;
+						// if (this->_body_size - 1 > my_len && my_len >= 0)
+						// 	return 0;
 					}
 					return 1;
 				}

@@ -355,8 +355,13 @@ void                        Response::handle_post_response(std::string connectio
     this->my_Res << "Server: Webserv/4.4.0\r\n";
     this->my_Res << "Location: " << this->get_my_upload_path() + "\r\n"; 
     this->my_Res << "Connection: " << connection  << "\r\n\r\n";
+    // this->my_Res << "Transfer-Encoding: chunked\r\n"; 
+    // this->my_Res << "0\r\n\r\n" << std::endl;
+
     this->total_size = this->my_Res.str().size();
     //std::cout << this->my_Res.str() << std::endl;
+    // std::cout << this->get_my_upload_path() << std::endl;
+    // std::cout << "handle_post_response" << std::endl;
     this->set_hello(this->my_Res.str());    
 }
 

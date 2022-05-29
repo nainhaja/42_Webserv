@@ -298,16 +298,19 @@ int           HttpRequest::store_body_content(size_t &body_size, std::ostringstr
 
     if (this->tranfer_encoding != "" && data.find("0\r\n\r\n") != std::string::npos)
     {
+        std::cout << "Condition 1 " << std::endl;
         body_stream << data << std::endl;
         return 0;
     }
     else if (this->content_length == body_size - 1)
     {
+        std::cout << "Condition 2 " << std::endl;
         body_stream << data << std::endl; 
         return 0;
     }
     else if (body_size - 1 > this->content_length)
     {
+        std::cout << "Condition 3 " << std::endl;
         this->content_length = 0;
         return 0;
     }
@@ -317,7 +320,7 @@ int           HttpRequest::store_body_content(size_t &body_size, std::ostringstr
 
 int           HttpRequest::read_data_from_fd(int & valread, std::string & data, int new_socket)
 {
-    char                buffer[5000] = {0};
+    char                buffer[5000] = {0}; 
 
     data = "";
     valread = read( new_socket , buffer, sizeof(buffer));
@@ -369,7 +372,8 @@ int            HttpRequest::handle_http_request(int new_socket, std::fstream & b
     }
     else
         return 0;
-    if (valread < 5000)
+    //std::cout << valread << std::endl;
+    if (valread < 5000 && this->Http_Method != "POST")
         return 0;
     data.clear();
     return 1; 

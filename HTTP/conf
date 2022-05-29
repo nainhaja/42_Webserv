@@ -1,5 +1,5 @@
 Server {
-    listen             127.0.0.1 8083
+    listen             127.0.0.1 8082
     root             ./HTTP
     allow_methods      GET POST 
 
@@ -47,8 +47,9 @@ Server {
         allow_methods DELETE POST GET
     }
 
-    cgi .php
+    cgi 
     {
+        path = .php
         allow_methods      POST
         cgi_path         /Volumes/SPYDERSY/webserv/cgi-bin/php-cgi
     }
