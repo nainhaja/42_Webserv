@@ -43,7 +43,7 @@ class Response
         Response(void);
         Response(std::string File_name);
         char                        *get_date(void);
-        std::string                 parsing_check(void);
+        std::string                 parsing_check(std::string target);
         Conf                        get_server(int index);
         std::string                 check_file(void);
         size_t                      handle_Get_response(void);

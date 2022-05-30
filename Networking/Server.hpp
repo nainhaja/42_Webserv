@@ -4,64 +4,16 @@
 #include "utilities_.hpp"
 #include "../HTTP/HttpRequest.hpp"
 #include "../HTTP/Response.hpp"
-#include "../HTTP/Conf.hpp"
 
-class Server
-{
+class Server;
 
-	public:
-
-		int Create();
-
-		int SAcceptCon();
-
-
-		//NETWORK I/O
-		int		accept();
-		int		send(int sock);
-		int		recv(int sock);
-
-		//ACCESSORS
-		void 	setSocket(std::string host, int port);
-		int		getsocketfd();
-		void	setAddress();
-		
-
-
-		void		setIndex(int i);
-		int			getIndex();
-
-
-
-		//CONSTRUCTORS AND OVERLOADS
-		Server();
-		Server(unsigned int host, int port);
-		Server( Server const & src );
-		~Server();
-		Server &		operator=( Server const & rhs );
-
-	private:
-		//std::vector<> of requests
-		//std::vector<> of responses
-
-		int							_fd;
-		//socket elements
-		int							_port;
-		unsigned int 				_host;
-		std::string 				_hoststring;
-
-
-
-		struct sockaddr_in			_addr;
-		int _addrlen;
-
-		//HTTP
-		class				_body
+class	_body
 		{
 			public :
-				_body()
+				_body(int fd)
 				{
-					_body_file.open("body.txt", std::ios::out);
+					_client_fd = fd;
+					_body_file.open("body" + std::to_string(_client_fd) +  ".txt", std::ios::out);
 					_body_size = 0;
 
 					_readcount = 0;
@@ -70,10 +22,11 @@ class Server
 
 					_startedwrite = false;
 					_startedread = false;
+					_http.set_body_ind(_client_fd);
 				}
 				~_body()
 				{
-					//_body_file.close();
+					_body_file.close();
 				}
 				HttpRequest			_http;
 				std::ostringstream  _body_stream;
@@ -87,6 +40,8 @@ class Server
 				bool				_startedread;
 				bool				_startedwrite;
 				int					_red_flag;
+
+				int					_client_fd;
 				
 				void				close_file()
 				{
@@ -100,9 +55,9 @@ class Server
 					request_target = this->_http.Get_Request_Target();
 					// std::cout << request_target << "HANA ASAT WTF" << std::endl;
 					this->_ok.setIndex(index);
-					// if (this->_ok.get_server(index).get_redirection_value(request_target))
+					// if (this->_ok.get_server(index).get_redirection_value(request_target) != "")
 					// 	this->_red_flag = 1;
-					//this->_ok.set_redirect_path(this->_ok.get_server(index).get_redirection(request_target));
+					//this->_ok.set_redirect_path(this->_ok.get_server(index).get_redirection_value(request_target));
 				}
 				// int					get_red_flag()
 				// {
@@ -114,12 +69,11 @@ class Server
 					this->_ok.set_request_target(this->_http.Get_Request_Target());
 					this->_ok.set_mybuffer(this->_http.Get_Request_Target());
 					this->_ok.check_file();
-					error_msg = this->_ok.parsing_check();
 				}
 
 				int				handle_body(std::string my_method, std::string my_chunk, std::string error_msg, int my_len)
 				{
-					this->set_values(my_method, error_msg);
+					// this->set_values(my_method, error_msg);
 					this->_http.set_my_upload_path(this->_ok.get_my_upload_path());	
 					if (my_method == "POST")
 					{
@@ -146,17 +100,103 @@ class Server
 				}
 
 
-
+			Server *srvr;
 		};
 
+
+class Server
+{
+
+	public:
+
+		int Create();
+
+		int SAcceptCon();
+
+
+		//NETWORK I/O
+		int		accept();
+		int		send(int sock, _body * bod);
+		int		send(int sock);
+		int		recv(int sock);
+
+		//ACCESSORS
+		void 	setSocket(std::string host, int port);
+		int		getsocketfd();
+		void	setAddress();
+
+		void	setName(std::string name);
+		std::string	getName();
+		
+		int			getPort();
+		std::string	getHost();
+
+		void		setIndex(int i);
+		int			getIndex();
+
+
+
+		//CONSTRUCTORS AND OVERLOADS
+		Server();
+		Server(unsigned int host, int port);
+		Server( Server const & src );
+		~Server();
+		Server &		operator=( Server const & rhs );
+
+	private:
+		//std::vector<> of requests
+		//std::vector<> of responses
+
+		int							_fd;
+		//socket elements
+		int							_port;
+		unsigned int 				_host;
+		std::string					_name;
+		std::string 				_hoststring;
+
+
+
+		struct sockaddr_in			_addr;
+		int _addrlen;
+
+		//HTTP
+		// class				_body
+		// {
+		// 	public :
+		// 		_body()
+		// 		{
+		// 			_body_file.open("body.txt", std::ios::out);
+		// 			_body_size = 0;
+
+		// 			_readcount = 0;
+		// 			_writecount = 0;
+
+		// 			_startedwrite = false;
+		// 			_startedread = false;
+		// 		}
+		// 		~_body() {}
+		// 		HttpRequest			_http;
+		// 		std::ostringstream  _body_stream;
+		// 		std::fstream    	_body_file;
+		// 		size_t          	_body_size;
+
+		// 		Response 			_ok;
+		// 		size_t				_readcount;
+		// 		size_t				_writecount;
+
+		// 		bool				_startedread;
+		// 		bool				_startedwrite;
+
+
+		// };
+
 		std::vector<HttpRequest>	_requestlist;
-		std::map<int, _body *>	_requestmap;
+		std::map<int, _body *>		_requestmap;
 
 
 
 
 		int					_index;
-
 		
 
 	struct SocketException : public std::exception

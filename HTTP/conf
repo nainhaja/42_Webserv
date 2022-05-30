@@ -22,7 +22,7 @@ Server {
     
     location {
         root ./HTTP
-        path /PATH03/nadi.png
+        path /PATH03/res.mp4
         autoindex on
         allow_methods  POST GET
     }
@@ -30,14 +30,14 @@ Server {
     location {
         root ./HTTP
         path /  
-        autoindex offX1
+        autoindex off
         allow_methods  POST GET
     }
     location {
         root ./HTTP
         path /PATH03/body.png
         autoindex on
-        allow_methods DELETE POST 
+        allow_methods DELETE POST GET
     }
 
     location {
