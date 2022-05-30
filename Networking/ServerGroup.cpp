@@ -234,8 +234,9 @@ void					ServerGroup::start()
 							}
 							close(i);
 						}
-						else if (flag >= 0)
+						else if (flag == 0)
 						{
+							std::cout << "ready to write "<< std::endl;
 							FD_CLR(i, & _masterfds);
 							FD_SET(i, & _masterwritefds);
 						}

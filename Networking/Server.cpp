@@ -189,11 +189,11 @@ int		Server::send(int sock, _body * bd)
 		bd->_ok.error_handling("400 Bad Request");
 	else
 	{
-		bd->set_values(my_method, error_msg);
-		error_msg = bd->_ok.parsing_check(request_target);
-		if (error_msg != "")
-		 	bd->_ok.error_handling(error_msg);
-		else if (!bd->handle_body(my_method, my_chunk, error_msg, my_len))
+		//bd->set_values(my_method, error_msg);
+		//error_msg = bd->_ok.parsing_check(request_target);
+		// if (error_msg != "")
+		//  	bd->_ok.error_handling(error_msg);
+		if (!bd->handle_body(my_method, my_chunk, error_msg, my_len))
 			bd->_ok.error_handling("400 Bad Request");
 		else
 		{
