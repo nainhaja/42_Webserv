@@ -307,6 +307,7 @@ void                        Response::handle_delete_response(std::string connect
 {
     int fd = -1;
 
+    check_file();
     if (remove(this->abs_path.c_str()) < 0)
 	{
 		if (errno == ENOENT)
@@ -325,6 +326,7 @@ void                        Response::handle_delete_response(std::string connect
         this->my_Res << "Date: "<< date << "\r\n";
         this->my_Res << "Server: Webserv/4.4.0\r\n";
         this->my_Res << "Connection: " << connection  << "\r\n\r\n";
+        this->total_size = this->my_Res.str().size();
         this->set_hello(this->my_Res.str());
         delete[] date;
     }
@@ -353,7 +355,7 @@ void                        Response::handle_redirect_response(std::string c)
     this->my_Res << "Location: " << "https://" + this->get_request_target() + "/"  << "\r\n"; 
     this->my_Res << "Connection: close" << "\r\n\r\n";
     this->total_size = this->my_Res.str().size();
-    std::cout << this->my_Res.str() << std::endl;
+    //std::cout << this->my_Res.str() << std::endl;
     //std::cout << this->my_Res.str() << std::endl;
     this->set_hello(this->my_Res.str());    
     delete[] date;
@@ -375,7 +377,7 @@ void                        Response::handle_post_response(std::string connectio
     // this->my_Res << "0\r\n\r\n" << std::endl;
     delete[] date;
     this->total_size = this->my_Res.str().size();
-    std::cout << this->my_Res.str() << std::endl;
+    //std::cout << this->my_Res.str() << std::endl;
     this->set_hello(this->my_Res.str());
 }
 
@@ -413,7 +415,7 @@ std::string                 Response::parsing_check(void)
     return "";
 }
 
-std::string                 Response::pars_check(std::string target_file)
+std::string                 Response::pars_check(std::string target_file, std::string my_method)
 {
     struct stat	              status;
     std::string               my_location_path;
@@ -422,17 +424,16 @@ std::string                 Response::pars_check(std::string target_file)
 
     for(int i=0; i < this->my_servers[_index].get_location_count() ; i++)
     {
-        
         my_location_path = this->my_servers[_index].get_locations()[i].get_location_path();
         this->my_upload_path = this->my_servers[_index].get_upload_path();
         if ((target_file == my_location_path) || (target_file == my_location_path + "/"))
         {
             location_methods = this->my_servers[_index].get_locations()[i].get_allow_methods();
-            if (std::find(location_methods.begin() , location_methods.end(), this->req_method) == location_methods.end())
+            if (std::find(location_methods.begin() , location_methods.end(), my_method) == location_methods.end())
                 return "405 Method Not Allowed";
         }
-        if (this->req_method != "POST" && stat(this->abs_path.c_str(), &status) < 0)
-            return "404 File Not found";
+        // if (this->req_method != "POST" && stat(this->abs_path.c_str(), &status) < 0)
+        //     return "404 File Not found";
     }
     return "";
 }

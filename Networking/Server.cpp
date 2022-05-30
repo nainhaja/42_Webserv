@@ -174,14 +174,14 @@ int		Server::send(int sock, _body * bd)
 	if (bd->_startedwrite == false)
 		bd->_startedwrite = true;
 	red_target = request_target.substr(request_target.find_last_of("/") + 1, request_target.size());
-	
 	red_target = bd->_ok.get_server(_index).get_redirection_value(red_target);
-	
-	//td::cout << red_target << std::endl;
-	if (red_target != "")
+	error_msg = bd->_ok.pars_check(bd->_http.Get_Request_Target(), bd->_http.Get_Http_Method());
+	if (error_msg != "")
 	{
-		//std::cout << "Here " << std::endl;
-		//request_target = red_target;
+		bd->_ok.error_handling(error_msg);
+	}
+	else if (red_target != "")
+	{
 		bd->_ok.set_request_target(red_target);
 		bd->_ok.handle_redirect_response(bd->_http.get_value("Connection"));
 	}
@@ -189,10 +189,6 @@ int		Server::send(int sock, _body * bd)
 		bd->_ok.error_handling("400 Bad Request");
 	else
 	{
-		//bd->set_values(my_method, error_msg);
-		//error_msg = bd->_ok.parsing_check(request_target);
-		// if (error_msg != "")
-		//  	bd->_ok.error_handling(error_msg);
 		if (!bd->handle_body(my_method, my_chunk, error_msg, my_len))
 			bd->_ok.error_handling("400 Bad Request");
 		else
@@ -211,7 +207,7 @@ int		Server::send(int sock, _body * bd)
 			}			
 		}
 	}
-
+	//std::cout << "My sock is" << sock << std::endl;
 	bd->_writecount += write(sock , bd->_ok.get_hello() + bd->_writecount , bd->_ok.get_total_size() - bd->_writecount);
 	bd->_ok.clear();
 	bd->close_file();
