@@ -1,7 +1,18 @@
 #ifndef Response_hpp
 #define Response_hpp
 
-#include "../utilities_.hpp"
+#include <stdio.h>
+#include <sys/socket.h>
+# include <netinet/in.h>
+#include <map>
+#include <string>
+#include <iterator>
+#include <vector>
+#include "Location.hpp"
+#include "Cgi.hpp"
+#include "Conf.hpp"
+#include "Servers.hpp"
+
 
 class Response
 {
@@ -49,7 +60,7 @@ class Response
         std::string                 get_mybuffer(void);
         char*                       get_hello();
         void                        set_hello(std::string c);
-        std::string                 genErrorPage(int code, const std::string &msg);
+        std::string                 genErrorPage(int code);
         size_t                      get_body(std::string path);
         void                        handle_delete_response(std::string connection);
         void                        handle_post_response(std::string connection);

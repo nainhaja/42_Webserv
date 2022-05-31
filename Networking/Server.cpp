@@ -202,7 +202,7 @@ int		Server::send(int sock, _body * bd, std::string config)
 			{
 				if (bd->_ok.get_max_body_size() < 0)
 					bd->_ok.error_handling("500 Webservice currently unavailable");
-				else if (bd->_http.get_total_size() > bd->_ok.get_max_body_size() && bd->_ok.get_max_body_size() != 0)
+				else if (bd->_http.get_total_size() > (size_t)bd->_ok.get_max_body_size() && bd->_ok.get_max_body_size() != 0)
 					bd->_ok.error_handling("413 Payload Too Large");
 				else
 				{
@@ -291,7 +291,7 @@ int		Server::recv(int sock)
 	else
 	{
 		_body *bd = it->second;
-		flag = bd->_http.handle_http_request(sock, bd->_body_file, bd->_body_size, bd->_body_stream);
+		flag = bd->_http.handle_http_request(sock, bd->_body_size, bd->_body_stream);
 		return flag;
 	}
 }
@@ -368,9 +368,10 @@ Server::Server()
 
 }
 
-Server::Server( const Server & src )
-{
-}
+// Server::Server( const Server & src )
+// {
+	
+// }
 
 Server::Server(unsigned int host, int port)
 {
@@ -391,20 +392,20 @@ Server::~Server()
 ** --------------------------------- OVERLOAD ---------------------------------
 */
 
-Server &				Server::operator=( Server const & rhs )
-{
-	//if ( this != &rhs )
-	//{
-		//this->_value = rhs.getValue();
-	//}
-	return *this;
-}
+// Server &				Server::operator=( Server const & rhs )
+// {
+// 	//if ( this != &rhs )
+// 	//{
+// 		//this->_value = rhs.getValue();
+// 	//}
+// 	return *this;
+// }
 
-std::ostream &			operator<<( std::ostream & o, Server const & i )
-{
-	//o << "Value = " << i.getValue();
-	return o;
-}
+// std::ostream &			operator<<( std::ostream & o, Server const & i )
+// {
+// 	//o << "Value = " << i.getValue();
+// 	return o;
+// }
 
 
 
@@ -418,11 +419,11 @@ std::ostream &			operator<<( std::ostream & o, Server const & i )
 
 int		Server::CGI_D_ayoub(_body * bd, std::string	request_target , std::string	my_method)
 {
-	int			pos;
+	size_t			pos;
 	std::string extention;
 
 	extention = "";
-	pos = request_target.find(".");
+	pos = request_target.find(".py");
 	if (pos != std::string::npos)
 		extention = request_target.substr(pos);
 	else
@@ -439,14 +440,15 @@ int		Server::CGI_D_ayoub(_body * bd, std::string	request_target , std::string	my
 
 
 	int f_fd;
+	int poss;
 	if (query != -1)
 	{
 		querry = extention.substr(query + 1);
 		extention = extention.substr(0,query);
 
-		pos = request_target.find('?');
-		if (pos != -1)
-			executable_script = request_target.substr(1,pos - 1);
+		poss = request_target.find('?');
+		if (poss != -1)
+			executable_script = request_target.substr(1,poss - 1);
 		else
 			executable_script = request_target;
 		//check if the exec-file exist
@@ -517,7 +519,7 @@ int		Server::CGI_D_ayoub(_body * bd, std::string	request_target , std::string	my
 
 			char **env_arr = new char*[env.size() + 1];
 
-			for (int i = 0; i < env.size(); ++i)
+			for (size_t i = 0; i < env.size(); ++i)
 				env_arr[i] = strdup(env[i].c_str());
 			env_arr[env.size()] = NULL;
 

@@ -1,4 +1,19 @@
-#include "../utilities_.hpp"
+#include "Conf.hpp"
+#include "Location.hpp"
+#include "Cgi.hpp"
+#include <iostream>
+#include <fstream>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <iterator>
 
 Conf::Conf(void)
 {
@@ -11,7 +26,7 @@ Conf::Conf(void)
 void                                    Conf::show_locations()
 {
     std::vector<Location> ok = this->get_locations();
-    for(int i = 0; i < ok.size(); i++)
+    for(size_t i = 0; i < ok.size(); i++)
     {
         std::cout << "\t\t\tLocation BLOCK\t\t\t" << std::endl;
         std::cout << "Root : \t\t\t\t" << ok[i].get_root() << std::endl;

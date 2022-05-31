@@ -1,5 +1,44 @@
 
-#include "../utilities_.hpp"
+#include "Conf.hpp"
+#include "Location.hpp"
+#include "Cgi.hpp"
+#include <iostream>
+#include <fstream>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <iterator>
+#include "Response.hpp"
+#include "Servers.hpp"
+
+#include <iostream>
+#include <unistd.h>
+#include <cstring>
+#include <map>
+#include <cstdlib>
+#include <vector>
+#include <sys/wait.h>
+#include <errno.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <istream>
+#include <sys/types.h>
+#include <signal.h>
+#include <string>
+#include <algorithm>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <iomanip>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 Response::Response(void)
 {
@@ -76,11 +115,11 @@ std::string              Response::get_error_body(std::string path)
 
     fd = open(path.c_str(), O_RDONLY);
     stat(path.c_str(), &status);
-    while(this->body_size < status.st_size)
+    while(this->body_size < (size_t)status.st_size)
     {
         len = read(fd, &buffer, 3000);
         this->body_size += len;
-        for (size_t i = 0; i < len; i++)
+        for (int i = 0; i < len; i++)
             line += buffer[i];
         my_Res_error << line;
         line.clear();
@@ -104,20 +143,20 @@ size_t              Response::get_body(std::string path)
     len = 0;
     fd = open(path.c_str(), O_RDONLY);
     stat(path.c_str(), &status);
-    while(this->body_size < status.st_size)
+    while(this->body_size < (size_t)status.st_size)
     {
         len = read(fd, buffer, sizeof(buffer));
         if (len <= 0)
             break;
         this->body_size += len;
-        for (size_t i = 0; i < len; i++)
+        for (int i = 0; i < len; i++)
             this->my_Res << buffer[i];
     }
     close(fd);
     return this->body_size;
 }
 
-std::string  Response::genErrorPage(int code, const std::string &msg)
+std::string  Response::genErrorPage(int code)
 {
     std::string error_page;
 
@@ -175,10 +214,10 @@ std::string                Response::check_file()
     ok.parse_server(this->get_config());//TODO:change with passed argument 
     while(getline(check, str, '/'))
         tokens.push_back(str);   
-    for(int i=0; i < ok.get_server()[_index].get_locations().size(); i++)
+    for(size_t i=0; i < ok.get_server()[_index].get_locations().size(); i++)
         location_paths.push_back(ok.get_server()[_index].get_locations()[i].get_location_path());
     this->max_body_size = ok.get_server()[_index].get_client_max_body_size();
-    for(int i=0; i < location_paths.size() ; i++)
+    for(size_t i=0; i < location_paths.size() ; i++)
     {
         if (location_paths[i] == path)
         {
@@ -259,7 +298,7 @@ void               Response::error_handling(std::string error)
     strftime(date, 29, "%a, %d %b %Y %T %Z", gmtime(&now));
 
     Error_ind = error.substr(0, 3);
-    error_page = genErrorPage(std::stoi(Error_ind), error.substr(4, error.size()));
+    error_page = genErrorPage(std::stoi(Error_ind));
     my_Res_error << "HTTP/1.1 " << error << std::endl;
     my_Res_error << "Date: "<< date << std::endl;
     my_Res_error << "Server: Webserv/4.4.0" << std::endl;
@@ -286,8 +325,6 @@ void                        Response::set_my_upload_path(std::string c)
 
 void                        Response::handle_delete_response(std::string connection)
 {
-    int fd = -1;
-
     check_file();
     if (remove(this->abs_path.c_str()) < 0)
 	{
@@ -298,8 +335,6 @@ void                        Response::handle_delete_response(std::string connect
 	}
     else
     {
-        struct stat         status;
-
         time_t	now = time(0);
 	    char	*date = new char[30]();
 	    strftime(date, 29, "%a, %d %b %Y %T %Z", gmtime(&now));
@@ -325,10 +360,10 @@ std::string                 Response::get_redirect_path(void)
 
 void                        Response::handle_redirect_response(std::string c)
 {
-    struct stat         status;
     time_t	now = time(0);
 	char	*date = new char[30]();
 	strftime(date, 29, "%a, %d %b %Y %T %Z", gmtime(&now));
+    c = "";
 
     this->my_Res << "HTTP/1.1 301 Moved Permanently\r\n";
     this->my_Res << "Date: "<< date << "\r\n";
@@ -344,7 +379,6 @@ void                        Response::handle_redirect_response(std::string c)
 
 void                        Response::handle_post_response(std::string connection)
 {
-    struct stat         status;
     time_t	now = time(0);
 	char	*date = new char[30]();
 	strftime(date, 29, "%a, %d %b %Y %T %Z", gmtime(&now));
@@ -398,7 +432,6 @@ std::string                 Response::parsing_check(void)
 
 std::string                 Response::pars_check(std::string target_file, std::string my_method)
 {
-    struct stat	              status;
     std::string               my_location_path;
     std::vector<std::string>  location_methods;
     std::string               error;
@@ -436,7 +469,7 @@ void                        Response::initiate_response(std::string & target_fil
 	char	*date = new char[30]();
 	strftime(date, 29, "%a, %d %b %Y %T %Z", gmtime(&now));
     this->total_size = 0;
-    if (this->pos <= this->my_servers[_index].get_locations().size() && this->pos >= 0)
+    if (this->pos <= (int)this->my_servers[_index].get_locations().size() && this->pos >= 0)
         target_file  = this->my_servers[_index].get_locations()[this->pos].get_location_path();
     else
         target_file = "";
@@ -450,7 +483,7 @@ int                        Response::search_dir_in_locations(std::string path)
 {
     std::string target;
 
-    for(int i=0;i < this->my_servers[_index].get_locations().size() ; i++)
+    for(size_t i=0;i < this->my_servers[_index].get_locations().size() ; i++)
     {
         target = this->my_servers[_index].get_locations()[i].get_location_path();
         if (path == target)
@@ -522,7 +555,7 @@ int                       Response::search_index_in_location()
     std::string         body;
     struct stat         status;
 
-    for(int i=0;i<this->my_servers[_index].get_locations()[this->pos].get_index().size();i++)
+    for(size_t i=0; i < this->my_servers[_index].get_locations()[this->pos].get_index().size(); i++)
     {
         body = this->abs_path + this->my_servers[_index].get_locations()[this->pos].get_index()[i];
         if (stat(body.c_str(), &status) >= 0)
@@ -542,7 +575,7 @@ int                       Response::search_index_in_server()
     std::string         body;
     struct stat         status;
 
-    for(int i=0 ; i < this->my_servers[_index].get_index().size() ; i++)
+    for(size_t i=0 ; i < this->my_servers[_index].get_index().size() ; i++)
     {
         body = this->abs_path + this->my_servers[_index].get_index()[i];
         if (stat(body.c_str(), &status) >= 0)
@@ -624,9 +657,7 @@ std::string Response::parse_response_cgi(std::string ret)
     std::string fake_header;
     std::string real_header;
     std::string body;
-    int size;
     int startindicator;
-    int endindicator;
     int pos;
     pos = ret.find("\n\r\n");
     fake_header = ret.substr(0,pos + 1);

@@ -1,4 +1,17 @@
-#include "../utilities_.hpp"
+#include "Conf.hpp"
+#include <iostream>
+#include <fstream>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <iterator>
 
 void                             Conf::parse_server(std::vector <std::string> tokens)
 {
@@ -15,12 +28,12 @@ void                             Conf::parse_server(std::vector <std::string> to
         this->server_name = tokens[1];
     else if (tokens[0] == "allow_methods")
     {
-        for(int i=1; i < tokens.size();i++)
+        for(size_t i=1; i < tokens.size();i++)
             this->Allow_methods.push_back(tokens[i]); 
     }
     else if (tokens[0] == "index")
     {
-        for(int i=1; i < tokens.size();i++)
+        for(size_t i=1; i < tokens.size();i++)
             this->Index.push_back(tokens[i]); 
     }
     else if (tokens[0] == "error_page" && tokens.size() == 3)
@@ -64,13 +77,13 @@ void                            Conf::parse_location(std::vector <std::string> t
         a.set_root(tokens[1]);
     else if (tokens[0] == "allow_methods")
     {
-        for(int i=1; i < tokens.size();i++)
+        for(size_t i=1; i < tokens.size();i++)
             allow_methodss.push_back(tokens[i]); 
         a.set_allow_methods(allow_methodss);
     }
     else if (tokens[0] == "index")
     {
-        for(int i=1; i < tokens.size();i++)
+        for(size_t i=1; i < tokens.size();i++)
             index_it.push_back(tokens[i]); 
         a.set_index(index_it);
     }
@@ -107,13 +120,13 @@ void                            Conf::parse_Cgi(std::vector <std::string> tokens
         a.set_cgi_path(tokens[1]);
     else if (tokens[0] == "allow_methods")
     {
-        for(int i=1; i < tokens.size();i++)
+        for(size_t i=1; i < tokens.size();i++)
             allow_methodss.push_back(tokens[i]); 
         a.set_allow_methods(allow_methodss);
     }
     else if (tokens[0] == "index")
     {
-        for(int i=1; i < tokens.size();i++)
+        for(size_t i=1; i < tokens.size();i++)
             index_it.push_back(tokens[i]); 
         a.set_index(index_it);
     }

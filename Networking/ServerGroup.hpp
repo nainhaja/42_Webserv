@@ -8,6 +8,7 @@
 #include "../HTTP/Response.hpp"
 #include "../HTTP/Servers.hpp"
 
+
 	class listener{
 		public :
 		listener(){};
@@ -81,7 +82,7 @@ class ServerGroup
 	fd_set							_masterfds;
 	fd_set							_masterwritefds;
 	unsigned int					_fd_size;
-	unsigned int					_fd_cap;
+	int								_fd_cap;
 
 	fd_set 							_readset;
     fd_set 							_writeset;
@@ -125,7 +126,7 @@ class ServerGroup
 	};
 
 
-	DebugWS 						Debugging;
+	//DebugWS 						Debugging;
 };
 
 std::ostream &			operator<<( std::ostream & o, ServerGroup const & i );

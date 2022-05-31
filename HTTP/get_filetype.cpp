@@ -35,11 +35,11 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <stdio.h>
+
+
 std::string                 Response::split_file_path(std::string type)
 {
-    
 	const char *ok;
-    int ind;
 
     ok = strrchr(type.c_str(), '.');
 	std::string res(ok);

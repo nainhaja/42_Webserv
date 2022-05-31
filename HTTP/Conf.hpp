@@ -1,7 +1,30 @@
 #ifndef Conf_hpp
 #define Conf_hpp
 
-#include "../utilities_.hpp"
+#include <stdio.h>
+#include <sys/socket.h>
+# include <netinet/in.h>
+#include <map>
+#include <string>
+#include <iterator>
+#include <vector>
+#include "Location.hpp"
+#include "Cgi.hpp"
+#include "Location.hpp"
+#include "Cgi.hpp"
+#include <iostream>
+#include <fstream>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <iterator>
 
 class Conf
 {

@@ -1,6 +1,17 @@
 #include "Cgi.hpp"
-
-
+#include <iostream>
+#include <fstream>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <iterator>
 void                                    Cgi::set_Listen(std::string c)
 {
     this->Cgi_Listen = c;

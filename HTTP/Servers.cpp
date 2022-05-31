@@ -1,5 +1,37 @@
-#include "../utilities_.hpp"
+#include "Conf.hpp"
+#include "Location.hpp"
+#include "Cgi.hpp"
+#include <iostream>
+#include <fstream>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <iterator>
+#include "Servers.hpp"
 
+
+#include <iostream>
+#include <unistd.h>
+#include <cstring>
+#include <map>
+#include <cstdlib>
+#include <vector>
+#include <sys/wait.h>
+#include <errno.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <istream>
+#include <sys/types.h>
+#include <signal.h>
+#include <string>
+#include <algorithm>
 
 Servers::Servers(void)
 {

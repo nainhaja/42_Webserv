@@ -7,6 +7,10 @@
 
 class Server;
 
+
+
+
+
 class	_body
 		{
 			public :
@@ -93,6 +97,7 @@ class	_body
 							this->_body_size = this->_http.handle_chunked_body();
 						else
 							this->_http.handle_regular_body();
+						my_len = 0;
 						// if (this->_body_size - 1 > my_len && my_len >= 0)
 						// 	return 0;
 					}

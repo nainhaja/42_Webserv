@@ -14,10 +14,6 @@ ServerGroup::ServerGroup(char *configfile)
 
 }
 
-ServerGroup::ServerGroup( const ServerGroup & src )
-{
-
-}
 
 /*
 ** -------------------------------- DESTRUCTOR --------------------------------
@@ -32,20 +28,20 @@ ServerGroup::~ServerGroup()
 ** --------------------------------- OVERLOAD ---------------------------------
 */
 
-ServerGroup &				ServerGroup::operator=( ServerGroup const & rhs )
-{
-	//if ( this != &rhs )
-	//{
-		//this->_value = rhs.getValue();
-	//}
-	return *this;
-}
+// ServerGroup &				ServerGroup::operator=( ServerGroup const & rhs )
+// {
+// 	//if ( this != &rhs )
+// 	//{
+// 		//this->_value = rhs.getValue();
+// 	//}
+// 	return *this;
+// }
 
-std::ostream &			operator<<( std::ostream & o, ServerGroup const & i )
-{
-	//o << "Value = " << i.getValue();
-	return o;
-}
+// std::ostream &			operator<<( std::ostream & o, ServerGroup const & i )
+// {
+// 	//o << "Value = " << i.getValue();
+// 	return o;
+// }
 
 
 /*
@@ -153,7 +149,7 @@ void					ServerGroup::start(std::string config)
 
 		if (select((int)_fd_cap + 1, &_readset, &_writeset, NULL, &timetostop) < 0)
 			throw SelectException();
-		for (size_t i = 0; i <= _fd_cap ; i++)
+		for (int i = 0; i <= _fd_cap ; i++)
 		{
 			if (FD_ISSET(i, &_writeset) || FD_ISSET(i, &_readset))
 			{
@@ -298,7 +294,7 @@ int		ServerGroup::recvCon(int fd)
 		int			tmp_port;
 
 		bd = new _body(fd); 
-		flag = bd->_http.handle_http_request(fd, bd->_body_file, bd->_body_size, bd->_body_stream);
+		flag = bd->_http.handle_http_request(fd, bd->_body_size, bd->_body_stream);
 		tmp_servername = bd->_http.get_my_host();
 		tmp_host = bd->_http.get_my_host();
 		tmp_port = bd->_http.get_my_port();
@@ -318,7 +314,7 @@ int		ServerGroup::recvCon(int fd)
 	else
 	{
 		bd = it->second;
-		flag = bd->_http.handle_http_request(fd, bd->_body_file, bd->_body_size, bd->_body_stream);
+		flag = bd->_http.handle_http_request(fd, bd->_body_size, bd->_body_stream);
 	}	
 	return (flag);
 }

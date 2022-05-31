@@ -1,8 +1,14 @@
 #ifndef HttpRequest_hpp
 #define HttpRequest_hpp
 
+#include <stdio.h>
+#include <sys/socket.h>
+# include <netinet/in.h>
+#include <map>
+#include <string>
+#include <iterator>
+#include "Location.hpp"
 
-#include "../utilities_.hpp"
 
 class HttpRequest
 {
@@ -33,7 +39,7 @@ class HttpRequest
         std::string     get_my_upload_path(void);
         void            set_my_upload_path(std::string c);
         void            handle_regular_body(void);
-        int             handle_http_request(int new_socket, std::fstream & body_file, size_t &body_size, std::ostringstream & body_stream);
+        int             handle_http_request(int new_socket, size_t &body_size, std::ostringstream & body_stream);
         void            get_request(std::string data, size_t & body_size, std::ostringstream & body_stream);
         void            list_map(void);
         std::string     get_value(std::string key);

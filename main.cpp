@@ -1,6 +1,6 @@
-#include "./Networking/utilities_.hpp"
-#include "./Networking/ServerGroup.hpp"
-
+#include "Networking/utilities_.hpp"
+#include "Networking/ServerGroup.hpp"
+#include "Networking/Server.hpp"
 
 int main(int ac, char **av)
 {
@@ -13,7 +13,6 @@ int main(int ac, char **av)
 
   try 
   {
-
     serverG.build();
     serverG.start(av[1]);
   } 
