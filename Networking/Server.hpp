@@ -13,7 +13,7 @@ class	_body
 				_body(int fd)
 				{
 					_client_fd = fd;
-					_body_file.open("body" + std::to_string(_client_fd) +".txt", std::ios::out);
+					_body_file.open("body.txt", std::ios::out);
 					_body_size = 0;
 
 					_readcount = 0;
@@ -43,6 +43,15 @@ class	_body
 
 				int					_client_fd;
 				
+
+
+
+				///////ayoub
+				std::string response;
+				//////
+
+
+
 				void				close_file()
 				{
 					_body_file.close();
@@ -98,6 +107,8 @@ class	_body
 						this->_ok.handle_delete_response(this->_http.get_value("Connection"));
 					else if (my_method == "POST")
 						this->_ok.handle_post_response(this->_http.get_value("Connection"));
+					else
+						this->_ok.error_handling("405 Method Not Allowed");
 				}
 
 
@@ -117,7 +128,7 @@ class Server
 
 		//NETWORK I/O
 		int		accept();
-		int		send(int sock, _body * bod);
+		int		send(int sock, _body * bod,	std::string config);
 		int		send(int sock);
 		int		recv(int sock);
 
@@ -135,11 +146,21 @@ class Server
 		void		setIndex(int i);
 		int			getIndex();
 
-
+		///////ayoub
+		int		CGI_D_ayoub(_body * bd, std::string	request_target, std::string	my_method);
+		///////ayoub
 
 		//CONSTRUCTORS AND OVERLOADS
 		Server();
 		Server(unsigned int host, int port);
+		void				set_config(std::string c)
+		{
+			this->config = c;
+		}
+		std::string			get_config(void)
+		{
+			return this->config;
+		}
 		Server( Server const & src );
 		~Server();
 		Server &		operator=( Server const & rhs );
@@ -154,42 +175,14 @@ class Server
 		unsigned int 				_host;
 		std::string					_name;
 		std::string 				_hoststring;
+		std::string					config;
 
 
 
 		struct sockaddr_in			_addr;
 		int _addrlen;
 
-		//HTTP
-		// class				_body
-		// {
-		// 	public :
-		// 		_body()
-		// 		{
-		// 			_body_file.open("body.txt", std::ios::out);
-		// 			_body_size = 0;
 
-		// 			_readcount = 0;
-		// 			_writecount = 0;
-
-		// 			_startedwrite = false;
-		// 			_startedread = false;
-		// 		}
-		// 		~_body() {}
-		// 		HttpRequest			_http;
-		// 		std::ostringstream  _body_stream;
-		// 		std::fstream    	_body_file;
-		// 		size_t          	_body_size;
-
-		// 		Response 			_ok;
-		// 		size_t				_readcount;
-		// 		size_t				_writecount;
-
-		// 		bool				_startedread;
-		// 		bool				_startedwrite;
-
-
-		// };
 
 		std::vector<HttpRequest>	_requestlist;
 		std::map<int, _body *>		_requestmap;

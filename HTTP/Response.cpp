@@ -1,55 +1,36 @@
-#include "Conf.hpp"
-#include "Location.hpp"
-#include "Cgi.hpp"
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <iostream>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <iterator>
-#include "Response.hpp"
-#include "Servers.hpp"
 
-#include <iostream>
-#include <unistd.h>
-#include <cstring>
-#include <map>
-#include <cstdlib>
-#include <vector>
-#include <sys/wait.h>
-#include <errno.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <istream>
-#include <sys/types.h>
-#include <signal.h>
-#include <string>
-#include <algorithm>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <iomanip>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "../utilities_.hpp"
+
 Response::Response(void)
 {
-    Servers ok;
+    //Servers ok;
 
     this->max_body_size = 0;
-    ok.parse_server("HTTP/conf");
-    this->my_servers = ok.get_server();
+    // ok.parse_server("HTTP/conf");
+    //this->my_servers = ok.get_server();
     this->body_size = 0;
     this->req_method = "";
     this->my_upload_path = "";
     this->regular_path = "";
     
+}
+
+void                     Response::arrange_config(std::string c)
+{
+    Servers ok;
+
+    ok.parse_server(c);
+    this->my_servers = ok.get_server();
+    this->set_config(c);
+}
+
+void				    Response::set_config(std::string c)
+{
+    this->config = c;
+}
+std::string			    Response::get_config(void)
+{
+    return this->config;
 }
 
 void                     Response::set_request_method(std::string c)
@@ -191,7 +172,7 @@ std::string                Response::check_file()
 
     path = this->get_mybuffer();
     this->regular_path = this->get_mybuffer();
-    ok.parse_server("HTTP/conf");//TODO:change with passed argument 
+    ok.parse_server(this->get_config());//TODO:change with passed argument 
     while(getline(check, str, '/'))
         tokens.push_back(str);   
     for(int i=0; i < ok.get_server()[_index].get_locations().size(); i++)
@@ -250,7 +231,7 @@ bool                        Response::check_dir(std::string path)
             time_t	now = time(0);
 	        char	*date = new char[30]();
 	        strftime(date, 29, "%a, %d %b %Y %T %Z", gmtime(&now));
-            my_html_page << "<a href=\"" << buff << "\">" << buff << "</a>"; 
+            my_html_page << "<a href=\"" << this->regular_path + buff << "\">" << buff << "</a>"; 
             my_html_page << std::setw(62 - buff.length()) << date;
             if(S_ISDIR(status.st_mode))
 				my_html_page << std::setw(21) << std::right << "-\n";
@@ -635,4 +616,34 @@ void                        Response::dir_treatment()
         this->special_dir_in_location();
     else
         this->special_dir_in_server();
+}
+
+
+std::string Response::parse_response_cgi(std::string ret)
+{
+    std::string fake_header;
+    std::string real_header;
+    std::string body;
+    int size;
+    int startindicator;
+    int endindicator;
+    int pos;
+    pos = ret.find("\n\r\n");
+    fake_header = ret.substr(0,pos + 1);
+    body = ret.substr(pos + 1, EOF);
+   // std::cout  << "|||||" << body << "||||" << std::endl;
+   
+    if ( (startindicator = fake_header.find("HTTP/1.1")) == -1 )
+        real_header += "HTTP/1.1 200 OK\n";
+    else
+
+        real_header += fake_header.substr(startindicator,fake_header.find("\n",startindicator) + 1);
+     if ( (startindicator = fake_header.find("Content-type")) == -1 )
+        real_header += "Content-type:text/html\n";
+    else
+        real_header += fake_header.substr(startindicator,fake_header.find("\n",startindicator) + 1);
+
+    real_header += "Server: petitwebserv\n";
+    real_header += "Content-Length: " + std::to_string(body.size()) + "\n\r\n";
+        return real_header + body;
 }

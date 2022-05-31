@@ -1,16 +1,7 @@
-#ifndef Servers_hpp
-#define Servers_hpp
+#ifndef SERVERS_HPP
+#define SERVERS_HPP
 
-#include <stdio.h>
-#include <sys/socket.h>
-# include <netinet/in.h>
-#include <map>
-#include <string>
-#include <iterator>
-#include <vector>
-#include "Location.hpp"
-#include "Cgi.hpp"
-#include "Conf.hpp"
+#include "../utilities_.hpp"
 
 class Servers
 {

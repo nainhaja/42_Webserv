@@ -135,35 +135,11 @@ void					ServerGroup::build()
 				_fd_cap = fd;
 		}
 	}
-
-
-	// for (int i = 0; i < _servercount; i++)
-	// {
-	// 	Server		*currentsrv = new Server();
-	// 	int			fd;
-
-	// 	std::string host = my_confs[i].get_host();
-	// 	int port = my_confs[i].get_Port();
-	// 	std::string name = my_confs[i].get_server_name();
-	// 	std::cout << "server name : " << name << std::endl;
-	// 	currentsrv->setSocket(host, port);
-	// 	currentsrv->setName(name);
-	// 	if (currentsrv->Create() != -1)
-	// 	{
-	// 		fd = currentsrv->getsocketfd();
-	// 		FD_SET(fd, &_masterfds);
-	// 		_servers_map.insert(std::make_pair(fd, currentsrv));
-	// 		currentsrv->setIndex(i);	
-
-	// 		if (fd > _fd_cap)
-	// 			_fd_cap = fd;
-	// 	}
-	// }
 	if (_fd_cap == 0)
 		throw BuildException();
 }
 
-void					ServerGroup::start()
+void					ServerGroup::start(std::string config)
 {
 	struct timeval	timetostop;
 	timetostop.tv_sec  = 1;
@@ -191,26 +167,6 @@ void					ServerGroup::start()
 						if (new_socket > _fd_cap)
 							_fd_cap = new_socket;
 					}
-					
-					// //accept connection
-					// std::map<int, Server *>::iterator it;
-					// it = _servers_map.find(i);
-					// if (it ==  _servers_map.end())
-					// {
-					// 	std::cout << "ERROR IN SERVERS MAP accept\n";
-					// 	//exit(EXIT_FAILURE);
-					// }
-					// std::cout << "fd : " << it->second->getsocketfd() << " index : " << it->second->getIndex() << std::endl;
-					// int new_socket = (it)->second->accept();
-					// if (new_socket > 0)
-					// {
-					// 	std::cout << "connection is accepted : " << new_socket << std::endl;
-					// 	FD_SET(new_socket, &_masterfds);
-					// 	if (new_socket > _fd_cap)
-					// 		_fd_cap = new_socket;
-
-					// 	_client_fds.insert(std::make_pair(new_socket, it->second));
-					// }
 				}
 				else
 				{
@@ -241,32 +197,7 @@ void					ServerGroup::start()
 							FD_SET(i, & _masterwritefds);
 						}
 
-						// int flag;
-						// std::map<int, Server *>::iterator it;
-						// it = _client_fds.find(i);
-						// if (it == _client_fds.end())
-						// {
-						// 	std::cout << "ERROR IN SERVERS Client MAP\n";
-						// 	exit(EXIT_FAILURE);
-						// }
 
-						// flag = (it)->second->recv(i);
-						// if (flag == -1)
-						// {
-						// 	FD_CLR(i, & _masterfds);
-						// 	_client_fds.erase(it);
-						// 	close(i);
-						// }
-						// else if (flag >= 0)
-						// {
-						// 	FD_CLR(i, & _masterfds);
-						// 	FD_SET(i, & _masterwritefds);
-						// }
-											// else if (flag > 0)
-											// {
-											// 	FD_CLR(i, & _masterfds);
-											// 	FD_SET(i, & _masterwritefds);
-											// }
 					}
 					else if (FD_ISSET(i, &_writeset)) // connection is ready to be written to
 					{
@@ -288,7 +219,7 @@ void					ServerGroup::start()
 							servr = (it)->second->srvr;
 
 							bd = (it)->second;
-							flag = servr->send(i, bd);
+							flag = servr->send(i, bd, config);
 
 							if (flag == 0)
 							{
@@ -298,26 +229,6 @@ void					ServerGroup::start()
 								close(i);
 							}
 						}
-
-
-						// std::map<int, Server *>::iterator it;
-						// it = _client_fds.find(i);
-						// if (it == _client_fds.end())
-						// {
-						// 	std::cout << "ERROR IN SERVERS MAP response\n";
-						// 	FD_CLR(i, & _masterwritefds);
-       					// 	close(i);
-						// 	//exit(EXIT_FAILURE);
-						// }
-						// int flag;
-						// flag = (it)->second->send(i);
-
-						// if (flag == 0)
-						// {
-						// 	_client_fds.erase(it);
-						// 	FD_CLR(i, & _masterwritefds);
-       					// 	close(i);
-						// }
 					}
 				}
 			}
@@ -369,59 +280,6 @@ Server	*ServerGroup::getHostServer(std::string servername, std::string host , in
 		it++;
 	}
 	return NULL;
-
-	/*
-	// std::map<std::string , VirtualServer *>::iterator it;
-	// std::vector<Server *>::iterator it3;
-
-	// // if (servername != host)
-	// if (!is_number(servername))
-	// {
-	// 	std::cout << "hello" <<std::endl;
-	// 	it = _servername_map.find(servername);
-	// 	if (it == _servername_map.end())
-	// 		std::cout << "flewla " << std::endl;
-
-	// 	it3 = it->second->_virtual_server_list.begin();
-
-	// 	if (it3 == it->second->_virtual_server_list.end())
-	// 		std::cout << "ftalta " << std::endl;
-
-	// 	while (it3 != it->second->_virtual_server_list.end())
-	// 	{
-
-	// 		if (servername == (*it3)->getName())
-	// 		{
-	// 			std::cout << "request host : " << host << std::endl;
-	// 			std::cout << "request port : " << port << std::endl;
-	// 			std::cout << "request name : " << servername << std::endl;
-	// 			return ((*it3));
-	// 		}
-	// 		it3++;
-	// 	}
-	// 	return (NULL);
-	// }
-	// else 
-	// {
-	// 	std::map<int, Server *>::iterator it4;
-	// 	it4 = _servers_map.begin();
-	// 	while (it4 != _servers_map.end())
-	// 	{
-	// 		////////////////
-	// 		if (it4->second->getHost() == host && it4->second->getPort() == port)
-	// 		{
-	// 			std::cout << "request host : " << host << std::endl;
-	// 			std::cout << "request port : " << port << std::endl;
-	// 			std::cout << "request name : " << servername << std::endl;
-	// 			return (it4->second);
-	// 		}
-	// 		it++;
-	// 	}
-	// }
-	// return (NULL);
-
-	*/
-	
 }
 
 int		ServerGroup::recvCon(int fd)
@@ -526,3 +384,6 @@ void	ServerGroup::resetFDCap()
 
 
 /* ************************************************************************** */
+
+
+

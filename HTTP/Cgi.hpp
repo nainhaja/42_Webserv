@@ -1,13 +1,7 @@
 #ifndef Cgi_hpp
 #define Cgi_hpp
 
-#include <stdio.h>
-#include <sys/socket.h>
-# include <netinet/in.h>
-#include <map>
-#include <string>
-#include <iterator>
-#include <vector>
+#include "../utilities_.hpp"
 
 class Cgi
 {

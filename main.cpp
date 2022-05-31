@@ -13,8 +13,9 @@ int main(int ac, char **av)
 
   try 
   {
+
     serverG.build();
-    serverG.start();
+    serverG.start(av[1]);
   } 
   catch (const std::exception& e) 
   {

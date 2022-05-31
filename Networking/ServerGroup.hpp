@@ -40,7 +40,7 @@ class ServerGroup
 
 
 		void	build();
-		void	start();
+		void	start(std::string config);
 		void	stop();
 
 		Server			*getHostServer(std::string servername, std::string host, int port);

@@ -1,13 +1,7 @@
 #ifndef Location_hpp
 #define Location_hpp
 
-#include <stdio.h>
-#include <sys/socket.h>
-# include <netinet/in.h>
-#include <map>
-#include <string>
-#include <iterator>
-#include <vector>
+#include "../utilities_.hpp"
 
 class Location
 {

@@ -1,13 +1,8 @@
 #ifndef HttpRequest_hpp
 #define HttpRequest_hpp
 
-#include <stdio.h>
-#include <sys/socket.h>
-# include <netinet/in.h>
-#include <map>
-#include <string>
-#include <iterator>
-#include "Location.hpp"
+
+#include "../utilities_.hpp"
 
 class HttpRequest
 {

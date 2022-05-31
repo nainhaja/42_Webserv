@@ -1,28 +1,4 @@
-#include "HttpRequest.hpp"
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <netinet/in.h>
-#include <string.h>
-
-# include <iostream>
-# include <unistd.h>
-# include <sstream>
-# include <fstream>
-# include <string>
-# include <vector>
-# include <map>
-# include <poll.h>
-# include <algorithm>
-# include <sys/stat.h>
-# include <fcntl.h>
-
-#include <iostream>
-#include <iomanip>
-#include <sstream>
+#include "../utilities_.hpp"
 
 std::map<std::string, std::string> HttpRequest::Parse_Map(std::string buff)
 {
@@ -119,7 +95,7 @@ void            HttpRequest::parse_line(std::string buff)
 
 void            HttpRequest::handle_regular_body(void)
 {
-    std::ifstream   file_2("body" + std::to_string(this->body_ind) +".txt");
+    std::ifstream   file_2("body.txt");
     std::fstream    result_file;
     std::string     str;
     std::string     file_type;
@@ -148,7 +124,7 @@ std::string     HttpRequest::get_file_type(void)
 
 int            HttpRequest::handle_chunked_body(void)
 {
-    std::ifstream       file_2("body" + std::to_string(this->body_ind) +".txt");
+    std::ifstream       file_2("body.txt");
     std::fstream        result_file;
     int                 my_total = 0;
     std::string         str;
