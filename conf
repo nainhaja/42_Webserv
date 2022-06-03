@@ -50,11 +50,11 @@ Server {
 }
 
 Server {
-    listen             127.0.0.1 8080
+    listen             127.0.0.1 8081
     server_name       nizar.com 
 
 
-    root             ./www
+    root             ./
     allow_methods      GET POST 
     
     upload_path        ./www/PATH03/
@@ -85,13 +85,6 @@ Server {
         allow_methods GET  POST
     } 
 
-
-    location {
-        root ./www
-        path /
-        autoindex on
-        allow_methods GET DELETE
-    } 
     cgi .py
     {
         allow_methods      POST
