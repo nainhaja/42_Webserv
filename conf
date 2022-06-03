@@ -47,6 +47,12 @@ Server {
         allow_methods      POST
         cgi_path         /usr/local/bin/python3
     }
+
+    cgi .php
+    {
+        allow_methods      POST
+        cgi_path         /usr/local/bin/python3
+    }
 }
 
 Server {

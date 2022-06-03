@@ -422,21 +422,52 @@ int		Server::CGI_D_ayoub(_body * bd, std::string	request_target , std::string	my
 {
 	size_t			pos;
 	std::string extention;
+	int				indice = 0;
+	Cgi				my_cgi;
 
 	extention = "";
-	pos = request_target.find(".py");
+	pos = request_target.find(".");
 	if (pos != std::string::npos)
-		extention = request_target.substr(pos);
+	{
+		if (request_target.substr(pos, 3) == ".py")
+		{	
+			for(size_t i=0;i < bd->_ok.get_server(_index).get_cgis().size();i++)
+			{
+				if (bd->_ok.get_server(_index).get_cgis()[i].get_cgi_block_path() == ".py")
+				{
+					my_cgi = bd->_ok.get_server(_index).get_cgis()[i];
+					pos = request_target.find(".py");
+					indice = i;
+				}
+			}
+		}
+		else if (request_target.substr(pos,4) == ".php")
+		{
+			for(size_t i=0;i < bd->_ok.get_server(_index).get_cgis().size();i++)
+			{
+				if (bd->_ok.get_server(_index).get_cgis()[i].get_cgi_block_path() == ".php")
+				{
+					my_cgi = bd->_ok.get_server(_index).get_cgis()[i];
+					pos = request_target.find(".php");
+					indice = i;
+				}
+			}
+		}
+		else
+			return 0;
+	}
+		//extention = request_target.substr(pos);
 	else
 		return 0;
 
+	extention = request_target.substr(pos);
 	int cgi = 0;
 	int query;
 	query = extention.find('?');
 
 
 	std::string querry;
-	std::string cgi_location =  bd->_ok.get_server(_index).get_cgi().get_cgi_path();
+	std::string cgi_location =  my_cgi.get_cgi_path();
 	std::string executable_script = request_target.substr(1);
 
 

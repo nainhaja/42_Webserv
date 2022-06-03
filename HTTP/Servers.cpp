@@ -41,7 +41,7 @@ void               Servers::parse_server(std::string name)
 {
     std::string     buff;
     std::ifstream   file(name);
-    Cgi             ok_cgi;
+    Cgi             *ok_cgi = new Cgi;
     Location        *ok = new Location;
     Conf            *my_conf = new Conf();
 
@@ -81,7 +81,10 @@ void               Servers::parse_server(std::string name)
                 }
                 else if (str == "}" && my_conf->get_cgi_block() == 1)
                 {
-                    my_conf->set_cgi(ok_cgi);
+                    my_conf->set_cgi(*ok_cgi);
+                    my_conf->add_cgi(*ok_cgi);
+                    delete ok_cgi;
+                    ok_cgi = new Cgi;
                     my_conf->set_cgi_block(0);
                 }
                 else if (str == "}" && this->server_block == 1)
@@ -119,7 +122,7 @@ void               Servers::parse_server(std::string name)
                 my_conf->parse_location(tokens, *ok);
             }                
             else if (my_conf->get_cgi_block() == 1)
-                my_conf->parse_Cgi(tokens, ok_cgi);
+                my_conf->parse_Cgi(tokens, *ok_cgi);
             else
                 my_conf->parse_server(tokens);
             empty_line = 0;        
