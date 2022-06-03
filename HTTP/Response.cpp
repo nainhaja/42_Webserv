@@ -199,7 +199,96 @@ void                        Response::clear()
     //delete[] this->hello;
 }
 
-std::string                Response::check_file()
+// std::map<> key location
+//
+/*
+    /PATH03/php/tmp/file
+
+    req.url.find(key) == 0
+    key.size();
+
+    ["/"] ->
+    ["/PATH03"] ->
+    ["/PATH0/html/"] ->
+    ["/PATH03/php/tmp/"] ->
+
+
+    /PATH03/html/index.html
+
+    /PATH03/
+    /
+    /PATH03/html/
+
+*/
+
+int                       Response::find_location(std::vector <std::string>   location_paths, std::string my_path)
+{
+    std::string path;
+    int         pos;
+    size_t      max;
+    std::vector <std::string>   result_paths;
+
+    max = 0;
+    this->location_indice = -1;
+    for(size_t i=0; i < location_paths.size() ; i++)
+    {
+        pos = my_path.find(location_paths[i]);
+        if (pos == 0)
+        {
+            if (max < location_paths[i].size())
+            {
+                max = location_paths[i].size();
+                this->location_indice = i;
+            }
+        }      
+    }
+    return this->location_indice;
+}
+
+int                      Response::check_my_method(std::string request_method, std::vector <std::string> Allow_methods)
+{
+    if (std::find(Allow_methods.begin() , Allow_methods.end(), request_method) == Allow_methods.end())
+        return 0;
+    return 1;
+}
+
+std::string                Response::check_my_location(std::string request_target, std::string request_method)
+{
+    Servers                     ok;
+    std::string                 path;
+    std::vector <std::string>   location_paths;
+    std::string                 str;
+    std::vector <std::string>   tokens;
+    std::stringstream           check(path);
+    int                         indice;
+    struct stat                 status;
+
+    ok.parse_server(this->get_config());//TODO:change with passed argument 
+    while(getline(check, str, '/'))
+        tokens.push_back(str);   
+    for(size_t i=0; i < ok.get_server()[_index].get_locations().size(); i++)
+        location_paths.push_back(ok.get_server()[_index].get_locations()[i].get_location_path());
+    this->max_body_size = ok.get_server()[_index].get_client_max_body_size();
+    indice = this->find_location(location_paths, request_target);
+    this->abs_path = ok.get_server()[_index].get_locations()[indice].get_root() + request_target;
+    this->regular_path = request_target;
+    stat(this->abs_path.c_str(), &status);
+    if (S_ISDIR(status.st_mode))
+    {
+        if (this->abs_path[this->abs_path.size() - 1] != '/')
+        {
+            this->abs_path += "/";
+            this->regular_path += "/";
+        }
+    }
+    if (! (this->check_my_method(request_method,  ok.get_server()[_index].get_locations()[indice].get_allow_methods())))
+        return "405 Method Not Allowed";
+    return "";
+}
+
+
+
+std::string                Response::check_file(void)
 {
     Servers                     ok;
     std::string                 path;
@@ -325,7 +414,9 @@ void                        Response::set_my_upload_path(std::string c)
 
 void                        Response::handle_delete_response(std::string connection)
 {
-    check_file();
+
+    this->check_my_location(this->get_request_target(), this->get_request_method());
+    //check_file();
     if (remove(this->abs_path.c_str()) < 0)
 	{
 		if (errno == ENOENT)

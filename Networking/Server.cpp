@@ -176,16 +176,19 @@ int		Server::send(int sock, _body * bd, std::string config)
 		bd->_startedwrite = true;
 
 	int cgi = CGI_D_ayoub(bd, bd->_http.Get_Request_Target(), bd->_http.Get_Http_Method());
-	//int cgi = 0;
+	//int  cgi = 0;
 	//std::cout << "???????" << std::endl;
 	if (cgi == 0)
 	{
+		error_msg = bd->_ok.check_my_location(bd->_http.Get_Request_Target(), bd->_http.Get_Http_Method());
+		
 		red_target = request_target.substr(request_target.find_last_of("/") + 1, request_target.size());
 		red_target = bd->_ok.get_server(_index).get_redirection_value(red_target);
-		error_msg = bd->_ok.pars_check(bd->_http.Get_Request_Target(), bd->_http.Get_Http_Method());
+		
+		//error_msg = bd->_ok.pars_check(bd->_http.Get_Request_Target(), bd->_http.Get_Http_Method());
 		if (error_msg != "")
 		{
-			bd->_ok.error_handling(error_msg);
+			bd->_ok.error_handling("405 Method Not Allowed");
 		}
 		else if (red_target != "")
 		{

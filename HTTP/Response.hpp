@@ -38,6 +38,7 @@ class Response
         std::string                     redirect_path;
         std::string                     regular_path;
         std::string                     config;
+        int                             location_indice;
 
 
         int                             _index;
@@ -49,6 +50,8 @@ class Response
         std::string                 pars_check(std::string target_file, std::string my_method);
         Conf                        get_server(int index);
         std::string                 check_file(void);
+        std::string                 check_my_location(std::string request_target, std::string request_method);
+        int                         check_my_method(std::string request_method, std::vector <std::string> Allow_methods);
         size_t                      handle_Get_response(void);
         void                        error_handling(std::string error);
         std::string                 get_file_type(std::string type);
@@ -97,6 +100,7 @@ class Response
         void                        arrange_config(std::string c);
         void				        set_config(std::string c);
         std::string			        get_config(void);
+        int                         find_location(std::vector <std::string>   location_paths, std::string my_path);
         ~Response(void);
 
 

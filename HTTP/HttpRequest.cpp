@@ -127,6 +127,7 @@ void            HttpRequest::handle_regular_body(void)
     file_type = this->get_file_type();
     //std::cout << this->get_my_upload_path() << std::endl;
     result_file.open(this->get_my_upload_path() + "res" + file_type, std::ios::out);
+    std::cout << this->get_my_upload_path() + "res" + file_type << std::endl;
     while(getline(file_2, str))
         result_file << str + "\n";
     result_file.close();
