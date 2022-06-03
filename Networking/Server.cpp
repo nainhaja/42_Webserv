@@ -260,8 +260,6 @@ int		Server::send(int sock, _body * bd, std::string config)
 		flag = write(sock, bd->response.c_str() + bd->_writecount , bd->response.size() - bd->_writecount);
 
 
-
-
 	bd->_writecount += flag;
 	bd->_ok.clear();
 	bd->close_file();
@@ -477,31 +475,36 @@ int		Server::CGI_D_ayoub(_body * bd, std::string	request_target , std::string	my
 	{
 		cgi = 1;
 		int fd = open("/tmp/test", O_RDWR | O_CREAT, 0777);
-		int body = open("/tmp/body", O_RDWR | O_CREAT, 0777);
-	
+		int body = open("body", O_RDWR | O_CREAT, 0777);
+		if (my_method == "POST")
+		{
+			std::string bodyy = bd->_body_stream.str();
+			write(body,bodyy.c_str(),bodyy.size());
+			close(body);
+		}
 		int fork_id = fork();
-
+		
 		if (fork_id == -1)
 		{
 			std::cout << "error on fork forking" << std::endl;
 
 			remove("/tmp/test");
 			remove("/tmp/body");
-			close(body);
+			//close(body);
 			close(fd);
 
 			return (-2);//internal error 500
 		}
 		else if (fork_id == 0)
 		{
+			body = open("body", O_RDWR , 0777);
 			if (my_method == "POST")
 			{
-				std::string bodyy = bd->_body_stream.str();
-				write(body,bodyy.c_str(),bodyy.size());
-				dup2(body,0);
+				dup2(body, 0);
+				close(body);
 			}
 			dup2(fd,1);
-
+			close(fd);
 			char *args[3];
 			args[0] = (char *)cgi_location.c_str();
 			args[1] = (char *)executable_script.c_str();
@@ -526,10 +529,9 @@ int		Server::CGI_D_ayoub(_body * bd, std::string	request_target , std::string	my
 				env_arr[i] = strdup(env[i].c_str());
 			env_arr[env.size()] = NULL;
 
-			if (execve(cgi_location.c_str(),args,env_arr) == -1)
+			if (execve(cgi_location.c_str(),args, env_arr) == -1)
 			{
 				perror("Could not execute");
-
 			}
 			
 		}

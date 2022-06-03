@@ -4,7 +4,9 @@ SRC = main.cpp Networking/Server.cpp Networking/ServerGroup.cpp HTTP/Cgi.cpp HTT
 
 CC = clang++  -std=c++98
 
-FLAGS = -Wall -Wextra -Werror
+FLAGS = -Wall -Wextra -Werror -fsanitize=address -g3
+
+CONF= conf
 
 all : $(NAME)
 
@@ -13,7 +15,8 @@ $(NAME) : $(SRC)
 
 clean :
 	rm -rf $(NAME)
-	
+run :
+	./$(NAME) 	$(CONF)
 fclean : clean
 
 re : clean all
